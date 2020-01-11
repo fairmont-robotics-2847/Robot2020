@@ -32,9 +32,11 @@ public class Robot extends TimedRobot implements IDriveDelegate {
 		new Action(ActionType.kMove, 3),
 		new Action(ActionType.kRotate, 90),
 		new Action(ActionType.kMove, 3),
+		new Action(ActionType.kRotate, 90),
+		new Action(ActionType.kMove, 3),
 		new Action(ActionType.kRotate, 90)
 	};
-	int _autoActionIndex = 0;
+	int _autoActionStep = 0;
 
   	public void robotInit() {
 		initCamera();
@@ -43,8 +45,7 @@ public class Robot extends TimedRobot implements IDriveDelegate {
 	}
 
 	public void autonomousInit() {
-		_autoActionIndex = 0;
-		operationComplete();
+		nextStep(_autoActionStep = 0);
 	}
 
 	public void autonomousPeriodic() {
@@ -72,21 +73,18 @@ public class Robot extends TimedRobot implements IDriveDelegate {
 		camera.setResolution(640, 480);
 	}
 
-	boolean _operationComplete;
-
 	public void operationComplete() {
-		if (_autoActionIndex == _autoActions.length) _autoActionIndex = 0;
-		if (_autoActionIndex < _autoActions.length) {
-			double amount = _autoActions[_autoActionIndex].getAmount();
-			switch (_autoActions[_autoActionIndex].getType()) {
-				case kMove: _drive.move(amount); break;
-				case kRotate: _drive.rotate(amount); break;
-			}
-			++_autoActionIndex;
+		// TODO: why are we skipping steps?
+		if (_autoActionStep < _autoActions.length - 1) {
+			nextStep(++_autoActionStep);
 		}
 	}
 
+	private void nextStep(int step) {
+		_drive.doAction(_autoActions[step]);
+	}
+
 	private void reportDiagnostics() {
-		SmartDashboard.putNumber("Step", _autoActionIndex);
+		SmartDashboard.putNumber("Step", _autoActionStep);
 	}
 }
