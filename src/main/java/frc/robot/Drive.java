@@ -87,10 +87,6 @@ public class Drive {
     }
 
     public void doAction(Action action) {
-        _moving = false;
-        _targetPosition = 0;
-        _rotating = false;
-        _targetRotation = 0;
         double amount = action.getAmount();
 		switch (action.getType()) {
 			case kMove: move(amount); break;
