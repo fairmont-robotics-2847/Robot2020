@@ -10,9 +10,9 @@ public class Ball{
     }
     
     public void set(boolean intake, boolean expel){
-        if(intake) {
+        if (intake) {
 			_ballControl.set(.5);
-		} else if(expel) {
+		} else if (expel) {
 			_ballControl.set(-.5);
 		} else {
 			_ballControl.set(0);
