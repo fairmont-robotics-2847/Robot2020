@@ -62,9 +62,12 @@ public class Drive {
         if (_moving) {
             double position = getPosition();
             if (_targetPosition > 0 && position < _targetPosition) {
-                _drive.arcadeDrive(0.4, 0);
+                if (getRotation() < _targetRotation) _turn = 0.2;
+                else if (getRotation() > _targetRotation) _turn = -0.2;
+                else _turn = 0;
+                _drive.arcadeDrive(0.4, _turn);
             } else if (_targetPosition < 0 && position > _targetPosition) {
-                _drive.arcadeDrive(-0.4, 0);
+                _drive.arcadeDrive(-0.4, _turn);
             } else {         
                 _moving = false;
                 _delegate.operationComplete();
@@ -97,25 +100,33 @@ public class Drive {
     private void move(double feet) {
         resetPosition();
         _targetPosition = feet;
+        _targetRotation = getRotation();
+        _turn = 0;
         _moving = true;
     }
 
     private double _targetPosition;
+    private double _turn;
+
+    private int[] _ref = new int[2];
 
     private double getPosition() {
-        int rightPos = _frontRight.getSensorCollection().getQuadraturePosition(); // positive going forward
-        int leftPos = _frontLeft.getSensorCollection().getQuadraturePosition(); // negative going forward
+        int rightPos = _frontRight.getSensorCollection().getQuadraturePosition() - _ref[0]; // positive going forward
+        int leftPos = _frontLeft.getSensorCollection().getQuadraturePosition() - _ref[1]; // negative going forward
         return ((rightPos - leftPos) / 2) / 2434; // 2434 obtained through experimentation
     }
 
     private void resetPosition() {
-        _frontRight.getSensorCollection().setQuadraturePosition(0, 10000);
-        _frontLeft.getSensorCollection().setQuadraturePosition(0, 10000);
+        //_frontRight.getSensorCollection().setQuadraturePosition(0, 10000);
+        //_frontLeft.getSensorCollection().setQuadraturePosition(0, 10000);
+        _ref[0] = _frontRight.getSensorCollection().getQuadraturePosition();
+        _ref[1] = _frontLeft.getSensorCollection().getQuadraturePosition();
+        System.out.println(_ref[0] + " " + _ref[1]);
     }
 
     private void rotate(double degrees) {
         resetRotation();
-        double anticipation = degrees > 0 ? -4 : 4;
+        double anticipation = degrees > 0 ? -7 : 7;
         _targetRotation = degrees + anticipation;
         _rotating = true;
     }

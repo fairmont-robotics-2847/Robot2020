@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Action.ActionType;
 
+import edu.wpi.first.wpilibj.Timer;
+
 public class Robot extends TimedRobot implements IDriveDelegate {
 	// Driver input
 	Joystick _joy = new Joystick(0);
@@ -27,14 +29,14 @@ public class Robot extends TimedRobot implements IDriveDelegate {
 	Ball _ball = new Ball();
 	//
 	Action[] _autoActions = {
-		new Action(ActionType.kMove, 3),
+		new Action(ActionType.kMove, 10)/*,
 		new Action(ActionType.kRotate, 90),
 		new Action(ActionType.kMove, 3),
 		new Action(ActionType.kRotate, 90),
 		new Action(ActionType.kMove, 3),
 		new Action(ActionType.kRotate, 90),
 		new Action(ActionType.kMove, 3),
-		new Action(ActionType.kRotate, 90)
+		new Action(ActionType.kRotate, 90)*/
 	};
 	int _autoActionStep = 0;
 
@@ -69,12 +71,11 @@ public class Robot extends TimedRobot implements IDriveDelegate {
 	}
 
 	private void initCamera() {
-		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-		camera.setResolution(640, 480);
+		//UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+		//camera.setResolution(640, 480);
 	}
 
 	public void operationComplete() {
-		// TODO: why are we skipping steps?
 		if (_autoActionStep < _autoActions.length - 1) {
 			nextStep(++_autoActionStep);
 		}
