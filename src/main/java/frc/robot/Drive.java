@@ -5,27 +5,30 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.sensors.PigeonIMU;
-
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Drive {
     private IDriveDelegate _delegate;
+    private WPI_TalonSRX _frontRight = new WPI_TalonSRX(1);
+    private WPI_VictorSPX _rearRight = new WPI_VictorSPX(1);
+    private WPI_TalonSRX _frontLeft = new WPI_TalonSRX(0);
+	private WPI_VictorSPX _rearLeft = new WPI_VictorSPX(0);
+    private SpeedControllerGroup _left = new SpeedControllerGroup(_frontLeft, _rearLeft);    
+    private SpeedControllerGroup _right = new SpeedControllerGroup(_frontRight, _rearRight);
+    private DifferentialDrive _drive = new DifferentialDrive(_left, _right);
+    private ADXRS450_Gyro _gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
+    private PigeonIMU _gyroPIMU = new PigeonIMU(3);
+    private boolean _moving;
+    private boolean _rotating;
+    private int _startPosition;
+    Heading _heading = new Heading();
+    private double _targetRotation;
 
     Drive(IDriveDelegate delegate) {
         _delegate = delegate;
     }
-    
-    WPI_TalonSRX _frontRight = new WPI_TalonSRX(1);
-    WPI_VictorSPX _rearRight = new WPI_VictorSPX(1);
-    WPI_TalonSRX _frontLeft = new WPI_TalonSRX(0);
-	WPI_VictorSPX _rearLeft = new WPI_VictorSPX(0);
-    SpeedControllerGroup _left = new SpeedControllerGroup(_frontLeft, _rearLeft);    
-    SpeedControllerGroup _right = new SpeedControllerGroup(_frontRight, _rearRight);
-    DifferentialDrive _drive = new DifferentialDrive(_left, _right);
-    ADXRS450_Gyro _gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
-    PigeonIMU _gyroPIMU = new PigeonIMU(3);
 
     public void init() {
         _gyro.calibrate();
@@ -40,38 +43,31 @@ public class Drive {
     }
 
     private void reportDiagnostics() {
-        SmartDashboard.putNumber("R-Quad", _frontRight.getSensorCollection().getQuadraturePosition());
-        SmartDashboard.putNumber("L-Quad", _frontLeft.getSensorCollection().getQuadraturePosition());
-        SmartDashboard.putNumber("Rot (ADXRS450)", _gyro.getAngle());
-        SmartDashboard.putNumber("Rot", getRotation());
-        SmartDashboard.putNumber("T Pos", _targetPosition);
-        SmartDashboard.putNumber("T Rot", _targetRotation);
+
     }
 
     public void teleopPeriodic(double speed, double rotation) {
         _drive.arcadeDrive(speed, rotation);
+        
         reportDiagnostics();
     }
 
     // Autonomous functionality
 
-    boolean _moving;
-    boolean _rotating;
-
     public void autonomousPeriodic() {
         if (_moving) {
-            double position = getPosition();
-            if (_targetPosition > 0 && position < _targetPosition) {
-                if (getRotation() < _targetRotation) _turn = 0.2;
-                else if (getRotation() > _targetRotation) _turn = -0.2;
-                else _turn = 0;
-                _drive.arcadeDrive(0.4, _turn);
-            } else if (_targetPosition < 0 && position > _targetPosition) {
-                _drive.arcadeDrive(-0.4, _turn);
+            double angle = _heading.getHeading(getPosition(), getRotation());
+            SmartDashboard.putNumber("Distance", _heading.getDistance());
+            SmartDashboard.putNumber("Angle", angle);
+            if (_heading.getDistance() > 0) {
+                resetPosition();
+                resetRotation();
+                // The amount that we turn is proportional to the error in our heading
+                _drive.arcadeDrive(0.4, clip(angle / 10, -1.0, 1.0));
             } else {         
                 _moving = false;
                 _delegate.operationComplete();
-            }
+            } 
         } else if (_rotating) {
             double rotation = getRotation();
             if (_targetRotation > 0 && rotation < _targetRotation) {
@@ -89,6 +85,10 @@ public class Drive {
         reportDiagnostics();
     }
 
+    private double clip(double value, double min, double max) {
+        return Math.max(Math.min(value, max), min);
+    }
+
     public void doAction(Action action) {
         double amount = action.getAmount();
 		switch (action.getType()) {
@@ -99,29 +99,18 @@ public class Drive {
 
     private void move(double feet) {
         resetPosition();
-        _targetPosition = feet;
-        _targetRotation = getRotation();
-        _turn = 0;
+        resetRotation();
+        _heading.start(feet);
         _moving = true;
     }
 
-    private double _targetPosition;
-    private double _turn;
-
-    private int[] _ref = new int[2];
-
     private double getPosition() {
-        int rightPos = _frontRight.getSensorCollection().getQuadraturePosition() - _ref[0]; // positive going forward
-        int leftPos = _frontLeft.getSensorCollection().getQuadraturePosition() - _ref[1]; // negative going forward
-        return ((rightPos - leftPos) / 2) / 2434; // 2434 obtained through experimentation
+        int position = _frontRight.getSensorCollection().getQuadraturePosition() - _startPosition;
+        return position / 2434.0; // 2434 obtained through experimentation
     }
 
     private void resetPosition() {
-        //_frontRight.getSensorCollection().setQuadraturePosition(0, 10000);
-        //_frontLeft.getSensorCollection().setQuadraturePosition(0, 10000);
-        _ref[0] = _frontRight.getSensorCollection().getQuadraturePosition();
-        _ref[1] = _frontLeft.getSensorCollection().getQuadraturePosition();
-        System.out.println(_ref[0] + " " + _ref[1]);
+        _startPosition = _frontRight.getSensorCollection().getQuadraturePosition();
     }
 
     private void rotate(double degrees) {
@@ -130,8 +119,6 @@ public class Drive {
         _targetRotation = degrees + anticipation;
         _rotating = true;
     }
-
-    private double _targetRotation;
 
     private double getRotation() {
         //return _gyro.getAngle();
