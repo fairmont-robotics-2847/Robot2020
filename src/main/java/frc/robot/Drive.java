@@ -65,7 +65,8 @@ public class Drive {
                 if (getRotation() < _targetRotation) _turn = 0.2;
                 else if (getRotation() > _targetRotation) _turn = -0.2;
                 else _turn = 0;
-                _drive.arcadeDrive(0.4, _turn);
+                double remaining = _targetPosition - position;
+                _drive.arcadeDrive(remaining < 2.0 ? 0.4 : 0.6, _turn);
             } else if (_targetPosition < 0 && position > _targetPosition) {
                 _drive.arcadeDrive(-0.4, _turn);
             } else {         
@@ -75,9 +76,11 @@ public class Drive {
         } else if (_rotating) {
             double rotation = getRotation();
             if (_targetRotation > 0 && rotation < _targetRotation) {
-                _drive.arcadeDrive(0, 0.4);
+                double remaining = _targetRotation - rotation;
+                _drive.arcadeDrive(0, remaining > 15.0 ? 0.4 : 0.3);
             } else if (_targetRotation < 0 && rotation > _targetRotation) {
-                _drive.arcadeDrive(0, -0.4);
+                double remaining =  rotation - _targetRotation;
+                _drive.arcadeDrive(0, remaining > 15.0 ? -0.4 : -0.3);
             } else {
                 _rotating = false;
                 _delegate.operationComplete();
@@ -112,8 +115,9 @@ public class Drive {
 
     private double getPosition() {
         int rightPos = _frontRight.getSensorCollection().getQuadraturePosition() - _ref[0]; // positive going forward
-        int leftPos = _frontLeft.getSensorCollection().getQuadraturePosition() - _ref[1]; // negative going forward
-        return ((rightPos - leftPos) / 2) / 2434; // 2434 obtained through experimentation
+        //int leftPos = _frontLeft.getSensorCollection().getQuadraturePosition() - _ref[1]; // negative going forward
+        //return ((rightPos - leftPos) / 2) / 2434; // 2434 obtained through experimentation
+        return rightPos / 2600.0;
     }
 
     private void resetPosition() {
@@ -126,7 +130,7 @@ public class Drive {
 
     private void rotate(double degrees) {
         resetRotation();
-        double anticipation = degrees > 0 ? -7 : 7;
+        double anticipation = degrees > 0 ? -1 : 1;
         _targetRotation = degrees + anticipation;
         _rotating = true;
     }

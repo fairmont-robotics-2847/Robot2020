@@ -29,14 +29,14 @@ public class Robot extends TimedRobot implements IDriveDelegate {
 	Ball _ball = new Ball();
 	//
 	Action[] _autoActions = {
-		new Action(ActionType.kMove, 10)/*,
-		new Action(ActionType.kRotate, 90),
 		new Action(ActionType.kMove, 3),
 		new Action(ActionType.kRotate, 90),
 		new Action(ActionType.kMove, 3),
 		new Action(ActionType.kRotate, 90),
 		new Action(ActionType.kMove, 3),
-		new Action(ActionType.kRotate, 90)*/
+		new Action(ActionType.kRotate, 90),
+		new Action(ActionType.kMove, 3),
+		new Action(ActionType.kRotate, 90)
 	};
 	int _autoActionStep = 0;
 
