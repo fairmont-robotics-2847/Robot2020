@@ -5,18 +5,18 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.sensors.PigeonIMU;
-
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Drive {
-    private IDriveDelegate _delegate;
-
-    Drive(IDriveDelegate delegate) {
-        _delegate = delegate;
+public class Drive implements IPerformer {
+    Drive(IChoreographer choreographer) {
+        _choreographer = choreographer;
+        _action = null;
+        _positionRef = 0;
     }
     
+    private IChoreographer _choreographer;
     WPI_TalonSRX _frontRight = new WPI_TalonSRX(1);
     WPI_VictorSPX _rearRight = new WPI_VictorSPX(1);
     WPI_TalonSRX _frontLeft = new WPI_TalonSRX(0);
@@ -26,26 +26,12 @@ public class Drive {
     DifferentialDrive _drive = new DifferentialDrive(_left, _right);
     ADXRS450_Gyro _gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     PigeonIMU _gyroPIMU = new PigeonIMU(3);
+    IAction _action;
+    private int _positionRef;
 
     public void init() {
         _gyro.calibrate();
         _gyro.reset();
-        resetPosition();
-        _moving = false;
-        _rotating = false;
-        /*_frontLeft.configFactoryDefault();
-		_rearLeft.configFactoryDefault();
-		_frontRight.configFactoryDefault();
-		_rearRight.configFactoryDefault();*/
-    }
-
-    private void reportDiagnostics() {
-        SmartDashboard.putNumber("R-Quad", _frontRight.getSensorCollection().getQuadraturePosition());
-        SmartDashboard.putNumber("L-Quad", _frontLeft.getSensorCollection().getQuadraturePosition());
-        SmartDashboard.putNumber("Rot (ADXRS450)", _gyro.getAngle());
-        SmartDashboard.putNumber("Rot", getRotation());
-        SmartDashboard.putNumber("T Pos", _targetPosition);
-        SmartDashboard.putNumber("T Rot", _targetRotation);
     }
 
     public void teleopPeriodic(double speed, double rotation) {
@@ -55,97 +41,89 @@ public class Drive {
 
     // Autonomous functionality
 
-    boolean _moving;
-    boolean _rotating;
-
     public void autonomousPeriodic() {
-        if (_moving) {
-            double position = getPosition();
-            if (_targetPosition > 0 && position < _targetPosition) {
-                if (getRotation() < _targetRotation) _turn = 0.2;
-                else if (getRotation() > _targetRotation) _turn = -0.2;
-                else _turn = 0;
-                double remaining = _targetPosition - position;
-                _drive.arcadeDrive(remaining < 2.0 ? 0.4 : 0.6, _turn);
-            } else if (_targetPosition < 0 && position > _targetPosition) {
-                _drive.arcadeDrive(-0.4, _turn);
-            } else {         
-                _moving = false;
-                _delegate.operationComplete();
-            }
-        } else if (_rotating) {
-            double rotation = getRotation();
-            if (_targetRotation > 0 && rotation < _targetRotation) {
-                double remaining = _targetRotation - rotation;
-                _drive.arcadeDrive(0, remaining > 15.0 ? 0.4 : 0.3);
-            } else if (_targetRotation < 0 && rotation > _targetRotation) {
-                double remaining =  rotation - _targetRotation;
-                _drive.arcadeDrive(0, remaining > 15.0 ? -0.4 : -0.3);
-            } else {
-                _rotating = false;
-                _delegate.operationComplete();
-            }
-        } else {
+        if (_action == null) {
             _drive.arcadeDrive(0, 0);
+        } else if (_action instanceof Move) {
+            Move move = (Move)_action;
+            double position = getPosition();
+            double heading = getHeading();
+            
+            // Slow down when we our near the target position
+            double speed = Math.abs(move.getGoal() - position) < 2.0 ? 0.4 : 0.6;
+
+            // Add rotation to correct heading errors
+            double rotation;
+            if (heading < 0) rotation = 0.2;
+            else if (heading > 0) rotation = -0.2;
+            else rotation = 0;
+            
+            if (move.getGoal() > 0 && position < move.getGoal()) {
+                _drive.arcadeDrive(speed, rotation);
+            } else if (move.getGoal() < 0 && position > move.getGoal()) {
+                _drive.arcadeDrive(-speed, -rotation);
+            } else {
+                move.complete(position, heading);
+                _action = null;
+                _choreographer.completed((IAction)move);
+            }
+        } else if (_action instanceof Turn) {
+            Turn turn = (Turn)_action;
+            double heading = getHeading();
+            
+            // Slow down when we are near the heading target 
+            double rotation = Math.abs(turn.getGoal() - heading) > 15 ? 0.4 : 0.3;
+
+            if (turn.getGoal() > 0 && heading < turn.getGoal() - 1.0) {
+                _drive.arcadeDrive(0, rotation);
+            } else if (turn.getGoal() < 0 && heading > turn.getGoal() + 1.0) {
+                _drive.arcadeDrive(0, -rotation);
+            } else {
+                turn.complete(heading);
+                _action = null;
+                _choreographer.completed((IAction)turn);
+            }
         }
 
         reportDiagnostics();
     }
 
-    public void doAction(Action action) {
-        double amount = action.getAmount();
-		switch (action.getType()) {
-			case kMove: move(amount); break;
-			case kRotate: rotate(amount); break;
+    public boolean perform(IAction action) {
+        if (action instanceof Move ||
+            action instanceof Turn) {
+            _action = action;
+            resetPosition();
+            resetHeading();
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void move(double feet) {
-        resetPosition();
-        _targetPosition = feet;
-        _targetRotation = getRotation();
-        _turn = 0;
-        _moving = true;
-    }
-
-    private double _targetPosition;
-    private double _turn;
-
-    private int[] _ref = new int[2];
-
     private double getPosition() {
-        int rightPos = _frontRight.getSensorCollection().getQuadraturePosition() - _ref[0]; // positive going forward
-        //int leftPos = _frontLeft.getSensorCollection().getQuadraturePosition() - _ref[1]; // negative going forward
-        //return ((rightPos - leftPos) / 2) / 2434; // 2434 obtained through experimentation
-        return rightPos / 2600.0;
+        return (_frontRight.getSensorCollection().getQuadraturePosition() - _positionRef) / 2600.0;
     }
 
     private void resetPosition() {
-        //_frontRight.getSensorCollection().setQuadraturePosition(0, 10000);
-        //_frontLeft.getSensorCollection().setQuadraturePosition(0, 10000);
-        _ref[0] = _frontRight.getSensorCollection().getQuadraturePosition();
-        _ref[1] = _frontLeft.getSensorCollection().getQuadraturePosition();
-        System.out.println(_ref[0] + " " + _ref[1]);
+        _positionRef = _frontRight.getSensorCollection().getQuadraturePosition();
     }
 
-    private void rotate(double degrees) {
-        resetRotation();
-        double anticipation = degrees > 0 ? -1 : 1;
-        _targetRotation = degrees + anticipation;
-        _rotating = true;
-    }
-
-    private double _targetRotation;
-
-    private double getRotation() {
+    private double getHeading() {
         //return _gyro.getAngle();
         double[] ypr = new double[3];
         _gyroPIMU.getYawPitchRoll(ypr);
         return -ypr[0];
     }
 
-    private void resetRotation() {
+    private void resetHeading() {
         //_gyro.reset();
         _gyroPIMU.setYaw(0);
+    }
+
+    private void reportDiagnostics() {
+        SmartDashboard.putNumber("R-Quad", _frontRight.getSensorCollection().getQuadraturePosition());
+        SmartDashboard.putNumber("L-Quad", _frontLeft.getSensorCollection().getQuadraturePosition());
+        SmartDashboard.putNumber("Rot (ADXRS450)", _gyro.getAngle());
+        SmartDashboard.putNumber("Rot", getHeading());
     }
 }

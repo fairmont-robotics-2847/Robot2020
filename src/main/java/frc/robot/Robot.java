@@ -1,73 +1,47 @@
 package frc.robot;
 
-import java.util.Queue;
-
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Action.ActionType;
 
-import edu.wpi.first.wpilibj.Timer;
-
-public class Robot extends TimedRobot implements IDriveDelegate {
-	// Driver input
+public class Robot extends TimedRobot implements IChoreographer {
 	Joystick _joy = new Joystick(0);
-	// Drive
 	Drive _drive = new Drive(this);
-	//Ball Intake and Expel
 	Ball _ball = new Ball();
-	//
-	Action[] _autoActions = {
-		new Action(ActionType.kMove, 3),
-		new Action(ActionType.kRotate, 90),
-		new Action(ActionType.kMove, 3),
-		new Action(ActionType.kRotate, 90),
-		new Action(ActionType.kMove, 3),
-		new Action(ActionType.kRotate, 90),
-		new Action(ActionType.kMove, 3),
-		new Action(ActionType.kRotate, 90)
+	IPerformer[] _performers = {
+		_drive,
+		_ball
 	};
-	int _autoActionStep = 0;
+	SquarePerformance _squarePerformance = new SquarePerformance();
+	IPerformance _performance;
 
-  	public void robotInit() {
+  public void robotInit() {
 		initCamera();
 		_drive.init();
 		_ball.init();
 	}
 
 	public void autonomousInit() {
-		nextStep(_autoActionStep = 0);
+		_performance = _squarePerformance; // can be substituted with another performance
+		if (_performance.more()) perform(_performance.next());
 	}
 
 	public void autonomousPeriodic() {
 		_drive.autonomousPeriodic();
-
-		reportDiagnostics();
+		_ball.autonomousPeriodic();
 	}
 	
   	public void teleopPeriodic() {
 		// Drive control
-		double speed = _joy.getY() * -.7;
-		double rotation = _joy.getZ() * .7;
+		double speed = _joy.getY() * -0.7;
+		double rotation = _joy.getZ() * 0.7;
 		_drive.teleopPeriodic(speed, rotation);
 		
-		//Ball Control
+		// Ball Control
 		boolean intakeBall = _joy.getRawButton(5);
 		boolean expelBall = _joy.getRawButton(7);
-		_ball.set(intakeBall, expelBall);
-
-		reportDiagnostics();
+		_ball.teleopPeriodic(intakeBall, expelBall);
 	}
 
 	private void initCamera() {
@@ -75,17 +49,25 @@ public class Robot extends TimedRobot implements IDriveDelegate {
 		//camera.setResolution(640, 480);
 	}
 
-	public void operationComplete() {
-		if (_autoActionStep < _autoActions.length - 1) {
-			nextStep(++_autoActionStep);
+	public void completed(IAction action) {
+		logAction(action);
+		_performance.completed(action);
+		if (_performance.more()) perform(_performance.next());
+	}
+
+	private void perform(IAction action) {
+		for (IPerformer performer : _performers) {
+			if (performer.perform(action)) break;
 		}
 	}
 
-	private void nextStep(int step) {
-		_drive.doAction(_autoActions[step]);
-	}
-
-	private void reportDiagnostics() {
-		SmartDashboard.putNumber("Step", _autoActionStep);
+	private void logAction(IAction action) {
+		if (action instanceof Move) {
+			Move move = (Move)action;
+			System.out.println("Move [Travelled: " + move.getTravelled() + "; heading: " + move.getHeading() + "]");
+		} else if (action instanceof Turn) {
+			Turn turn = (Turn)action;
+			System.out.println("Turn [Heading: " + turn.getHeading() + "]");
+		}
 	}
 }
