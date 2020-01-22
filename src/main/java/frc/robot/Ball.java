@@ -2,7 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
-public class Ball implements IPerformer {
+public class Ball implements IActor {
     WPI_VictorSPX _ballControl = new WPI_VictorSPX(6);
 
     public void init() {

@@ -9,14 +9,14 @@ import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Drive implements IPerformer {
-    Drive(IChoreographer choreographer) {
-        _choreographer = choreographer;
+public class Drive implements IActor {
+    Drive(ICommander commander) {
+        _commander = commander;
         _action = null;
         _positionRef = 0;
     }
     
-    private IChoreographer _choreographer;
+    private ICommander _commander;
     WPI_TalonSRX _frontRight = new WPI_TalonSRX(1);
     WPI_VictorSPX _rearRight = new WPI_VictorSPX(1);
     WPI_TalonSRX _frontLeft = new WPI_TalonSRX(0);
@@ -65,7 +65,7 @@ public class Drive implements IPerformer {
             } else {
                 move.complete(position, heading);
                 _action = null;
-                _choreographer.completed((IAction)move);
+                _commander.completed((IAction)move);
             }
         } else if (_action instanceof Turn) {
             Turn turn = (Turn)_action;
@@ -81,7 +81,7 @@ public class Drive implements IPerformer {
             } else {
                 turn.complete(heading);
                 _action = null;
-                _choreographer.completed((IAction)turn);
+                _commander.completed((IAction)turn);
             }
         }
 

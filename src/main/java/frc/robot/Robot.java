@@ -5,16 +5,16 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 
-public class Robot extends TimedRobot implements IChoreographer {
+public class Robot extends TimedRobot implements ICommander {
 	Joystick _joy = new Joystick(0);
 	Drive _drive = new Drive(this);
 	Ball _ball = new Ball();
-	IPerformer[] _performers = {
+	IActor[] _actors = {
 		_drive,
 		_ball
 	};
-	SquarePerformance _squarePerformance = new SquarePerformance();
-	IPerformance _performance;
+	SquareStrategy _squareStrategy = new SquareStrategy();
+	IStrategy _strategy;
 
   public void robotInit() {
 		initCamera();
@@ -23,8 +23,8 @@ public class Robot extends TimedRobot implements IChoreographer {
 	}
 
 	public void autonomousInit() {
-		_performance = _squarePerformance; // can be substituted with another performance
-		if (_performance.more()) perform(_performance.next());
+		_strategy = _squareStrategy; // can be substituted with another strategy
+		if (_strategy.more()) perform(_strategy.next());
 	}
 
 	public void autonomousPeriodic() {
@@ -51,13 +51,13 @@ public class Robot extends TimedRobot implements IChoreographer {
 
 	public void completed(IAction action) {
 		logAction(action);
-		_performance.completed(action);
-		if (_performance.more()) perform(_performance.next());
+		_strategy.completed(action);
+		if (_strategy.more()) perform(_strategy.next());
 	}
 
 	private void perform(IAction action) {
-		for (IPerformer performer : _performers) {
-			if (performer.perform(action)) break;
+		for (IActor actor : _actors) {
+			if (actor.perform(action)) break;
 		}
 	}
 

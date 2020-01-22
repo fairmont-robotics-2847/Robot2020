@@ -1,7 +1,7 @@
 package frc.robot;
 
-public class SquarePerformance implements IPerformance {
-  SquarePerformance() {
+public class SquareStrategy implements IStrategy {
+  SquareStrategy() {
     begin();
   }
 

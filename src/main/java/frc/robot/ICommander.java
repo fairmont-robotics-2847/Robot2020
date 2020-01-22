@@ -1,5 +1,5 @@
 package frc.robot;
 
-public interface IChoreographer {
+public interface ICommander {
     void completed(IAction action);
 }
