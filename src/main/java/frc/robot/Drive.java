@@ -109,14 +109,20 @@ public class Drive implements IActor {
     }
 
     private double getHeading() {
+        // If using the ADXRS450 Gyro
         //return _gyro.getAngle();
+        
+        // If using the Pigeon IMU
         double[] ypr = new double[3];
         _gyroPIMU.getYawPitchRoll(ypr);
         return -ypr[0];
     }
 
     private void resetHeading() {
+        // If using the ADXRS450 Gyro
         //_gyro.reset();
+
+        // If using the Pigeon IMU
         _gyroPIMU.setYaw(0);
     }
 

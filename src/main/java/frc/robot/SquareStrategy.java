@@ -1,5 +1,7 @@
 package frc.robot;
 
+// This is an example of a simple strategy that causes the robot to drive in a square
+
 public class SquareStrategy implements IStrategy {
   SquareStrategy() {
     begin();
@@ -18,7 +20,7 @@ public class SquareStrategy implements IStrategy {
   }
 
   public void completed(IAction action) {
-    
+    // This strategy doesn't use feedback
   }
 
   public boolean more() {
