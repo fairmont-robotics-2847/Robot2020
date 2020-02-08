@@ -17,7 +17,7 @@ public class Drive implements IActor {
         _positionRef = 0;
     }
     
-    private ICommander _commander;
+    ICommander _commander;
     WPI_TalonSRX _frontRight = new WPI_TalonSRX(0);
     WPI_VictorSPX _rearRight = new WPI_VictorSPX(0);
     WPI_TalonSRX _frontLeft = new WPI_TalonSRX(1);
@@ -29,18 +29,16 @@ public class Drive implements IActor {
     ADXRS450_Gyro _gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     PigeonIMU _gyroPIMU = new PigeonIMU(0);
     IAction _action;
-    private int _positionRef;
+    int _positionRef;
 
     public void init() {
         _gyro.calibrate();
         _gyro.reset();
-        
     }
 
     public void teleopPeriodic(double speed, double rotation) {
-        _drive.arcadeDrive(speed, rotation);
+        _drive.arcadeDrive(speed * 0.7, rotation * 0.7);
         reportDiagnostics();
-        
     }
 
     // Autonomous functionality

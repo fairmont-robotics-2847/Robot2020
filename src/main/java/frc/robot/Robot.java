@@ -13,34 +13,39 @@ public class Robot extends TimedRobot implements ICommander {
 	Ball _ball = new Ball();
 
 	// Motor controllers should be declared and used in a separate class (e.g. Drive.java or Ball.java)
-    /*WPI_VictorSPX _victor5 = new WPI_VictorSPX(5);
-    WPI_VictorSPX _victor6 = new WPI_VictorSPX(6);
+  /*WPI_VictorSPX _victor5 = new WPI_VictorSPX(5);
+  WPI_VictorSPX _victor6 = new WPI_VictorSPX(6);
 	WPI_VictorSPX _victor7 = new WPI_VictorSPX(7);*/
 
 	IActor[] _actors = {
 		_drive,
 		_ball
 	};
-	SquareStrategy _squareStrategy = new SquareStrategy();
-	LineStrategy _lineStrategy = new LineStrategy();
+
+	IStrategy[] _strategies = {
+		new SquareStrategy(),
+		new LineStrategy()
+	};
+	
 	IStrategy _strategy;
-	SendableChooser<Integer> _autoChooser = new SendableChooser<>();
+	
+	SendableChooser<Integer> _strategyChooser = new SendableChooser<>();
 
   	public void robotInit() {
 		initCamera();
 		_drive.init();
 		_ball.init();
-		_autoChooser.setDefaultOption("Square", 1);
-  		_autoChooser.addOption("Line", 2);
-		SmartDashboard.putData("Strategy", _autoChooser);
+		_strategyChooser.setDefaultOption("Square", 1);
+  	_strategyChooser.addOption("Line", 2);
+		SmartDashboard.putData("Strategy", _strategyChooser);
 	}
 
 	public void autonomousInit() {
-		switch (_autoChooser.getSelected()) {
-			case 1: _strategy = _squareStrategy; break;
-			case 2: _strategy = _lineStrategy; break;
+		if (_strategyChooser.getSelected() > 0 &&
+		    _strategyChooser.getSelected() <= _strategies.length) {
+			_strategy = _strategies[_strategyChooser.getSelected() - 1];
+			if (_strategy.more()) perform(_strategy.next());
 		}
-		if (_strategy.more()) perform(_strategy.next());
 	}
 
 	public void autonomousPeriodic() {
@@ -50,17 +55,18 @@ public class Robot extends TimedRobot implements ICommander {
 	
   	public void teleopPeriodic() {
 		// Drive control
-		double speed = _joy.getY() * -0.7;
-		double rotation = _joy.getZ() * 0.7;
+		double speed = -_joy.getY();
+		double rotation = _joy.getZ();
 		_drive.teleopPeriodic(speed, rotation);
 		
 		// Ball Control
-		boolean intakeBall = _joy.getRawButton(5);
-		boolean expelBall = _joy.getRawButton(7);
-		_ball.teleopPeriodic(intakeBall, expelBall);
+		boolean intake = _joy.getRawButton(5);
+		boolean launch = _joy.getRawButton(7);
+		_ball.teleopPeriodic(intake, launch);
 	}
 
 	private void initCamera() {
+		// TODO: uncomment these lines when a camera is attached
 		//UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		//camera.setResolution(640, 480);
 	}
@@ -78,6 +84,7 @@ public class Robot extends TimedRobot implements ICommander {
 	}
 
 	private void logAction(IAction action) {
+		// Might be helpful for debugging autonomous routines
 		if (action instanceof Move) {
 			Move move = (Move)action;
 			System.out.println("Move [Travelled: " + move.getTravelled() + "; heading: " + move.getHeading() + "]");
