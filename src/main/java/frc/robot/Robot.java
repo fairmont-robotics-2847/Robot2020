@@ -2,28 +2,44 @@ package frc.robot;
 
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.*;
 
 public class Robot extends TimedRobot implements ICommander {
 	Joystick _joy = new Joystick(0);
 	Drive _drive = new Drive(this);
 	Ball _ball = new Ball();
+
+	// Motor controllers should be declared and used in a separate class (e.g. Drive.java or Ball.java)
+    /*WPI_VictorSPX _victor5 = new WPI_VictorSPX(5);
+    WPI_VictorSPX _victor6 = new WPI_VictorSPX(6);
+	WPI_VictorSPX _victor7 = new WPI_VictorSPX(7);*/
+
 	IActor[] _actors = {
 		_drive,
 		_ball
 	};
 	SquareStrategy _squareStrategy = new SquareStrategy();
+	LineStrategy _lineStrategy = new LineStrategy();
 	IStrategy _strategy;
+	SendableChooser<Integer> _autoChooser = new SendableChooser<>();
 
-  public void robotInit() {
+  	public void robotInit() {
 		initCamera();
 		_drive.init();
 		_ball.init();
+		_autoChooser.setDefaultOption("Square", 1);
+  		_autoChooser.addOption("Line", 2);
+		SmartDashboard.putData("Strategy", _autoChooser);
 	}
 
 	public void autonomousInit() {
-		_strategy = _squareStrategy; // can be substituted with another strategy
+		switch (_autoChooser.getSelected()) {
+			case 1: _strategy = _squareStrategy; break;
+			case 2: _strategy = _lineStrategy; break;
+		}
 		if (_strategy.more()) perform(_strategy.next());
 	}
 

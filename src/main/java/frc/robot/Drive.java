@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -17,26 +18,29 @@ public class Drive implements IActor {
     }
     
     private ICommander _commander;
-    WPI_TalonSRX _frontRight = new WPI_TalonSRX(1);
-    WPI_VictorSPX _rearRight = new WPI_VictorSPX(1);
-    WPI_TalonSRX _frontLeft = new WPI_TalonSRX(0);
-	WPI_VictorSPX _rearLeft = new WPI_VictorSPX(0);
+    WPI_TalonSRX _frontRight = new WPI_TalonSRX(0);
+    WPI_VictorSPX _rearRight = new WPI_VictorSPX(0);
+    WPI_TalonSRX _frontLeft = new WPI_TalonSRX(1);
+    WPI_VictorSPX _rearLeft = new WPI_VictorSPX(1);
+
     SpeedControllerGroup _left = new SpeedControllerGroup(_frontLeft, _rearLeft);    
     SpeedControllerGroup _right = new SpeedControllerGroup(_frontRight, _rearRight);
     DifferentialDrive _drive = new DifferentialDrive(_left, _right);
     ADXRS450_Gyro _gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
-    PigeonIMU _gyroPIMU = new PigeonIMU(3);
+    PigeonIMU _gyroPIMU = new PigeonIMU(0);
     IAction _action;
     private int _positionRef;
 
     public void init() {
         _gyro.calibrate();
         _gyro.reset();
+        
     }
 
     public void teleopPeriodic(double speed, double rotation) {
         _drive.arcadeDrive(speed, rotation);
         reportDiagnostics();
+        
     }
 
     // Autonomous functionality
