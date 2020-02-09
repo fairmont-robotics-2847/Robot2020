@@ -7,7 +7,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 
-import edu.wpi.first.wpilibj.Timer;
+
 
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -30,9 +30,10 @@ public class Drive implements IActor {
     DifferentialDrive _drive = new DifferentialDrive(_left, _right);
     ADXRS450_Gyro _gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     PigeonIMU _gyroPIMU = new PigeonIMU(0);
-    Timer _timer = new Timer();
     IAction _action;
     int _positionRef;
+
+    Ball _ball = new Ball();
 
     public void init() {
         _gyro.calibrate();
@@ -45,7 +46,6 @@ public class Drive implements IActor {
     }
 
     // Autonomous functionality
-
     public void autonomousPeriodic() {
         if (_action == null) {
             _drive.arcadeDrive(0, 0);
@@ -90,20 +90,13 @@ public class Drive implements IActor {
             }
         } else if (_action instanceof Shoot) {
             Shoot shoot = (Shoot)_action;
-            double speed = shoot.getSpeed();
-            double delay = shoot.getTime();
-            double startingTime = 0;
+            boolean completed = _ball.perform(_action, shoot.getSpeed(), shoot.getTime());
 
-            if (startingTime == 0) {
-                startingTime = _timer.get();
-            } else if (_timer.get() < startingTime + delay) {
-                
-            }
-            
-        }
+            if (completed) {_commander.completed((IAction)shoot);}
 
+        }    
         reportDiagnostics();
-    }
+}
 
     public boolean perform(IAction action) {
         if (action instanceof Move ||

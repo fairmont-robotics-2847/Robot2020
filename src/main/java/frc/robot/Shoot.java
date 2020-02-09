@@ -23,18 +23,14 @@ public class Move implements IAction {
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Timer;
-
 public class Shoot implements IAction {
   Shoot (double time, double speed) {
-    _goalTime = time;
+    _time = time;
     _speed = speed;
   }
   
-
-
-   private double _goalTime;
-   public double getTime() { return _goalTime; }
+   private double _time;
+   public double getTime() { return _time; }
 
    private double _speed;
    public double getSpeed() { return _speed; }
