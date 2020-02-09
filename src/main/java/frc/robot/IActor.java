@@ -1,5 +1,5 @@
 package frc.robot;
 
 public interface IActor {
-  boolean perform(IAction action);
+    boolean perform(IAction action);
 }
