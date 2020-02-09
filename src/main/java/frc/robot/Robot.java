@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 
@@ -11,6 +13,7 @@ public class Robot extends TimedRobot implements ICommander {
 	Joystick _joy = new Joystick(0);
 	Drive _drive = new Drive(this);
 	Ball _ball = new Ball();
+	WPI_VictorSPX _elevate = new WPI_VictorSPX(7);
 
 	// Motor controllers should be declared and used in a separate class (e.g. Drive.java or Ball.java)
   /*WPI_VictorSPX _victor5 = new WPI_VictorSPX(5);
@@ -36,7 +39,7 @@ public class Robot extends TimedRobot implements ICommander {
 		_drive.init();
 		_ball.init();
 		_strategyChooser.setDefaultOption("Square", 1);
-  	_strategyChooser.addOption("Line", 2);
+  		_strategyChooser.addOption("Line", 2);
 		SmartDashboard.putData("Strategy", _strategyChooser);
 	}
 
@@ -63,6 +66,18 @@ public class Robot extends TimedRobot implements ICommander {
 		boolean intake = _joy.getRawButton(5);
 		boolean launch = _joy.getRawButton(7);
 		_ball.teleopPeriodic(intake, launch);
+
+		// Elevator test
+		double elevatorSpeed = .2;
+		if (_joy.getRawButton(6)) {
+			_elevate.set(-elevatorSpeed);
+		} else if (_joy.getRawButton(8)) {
+			_elevate.set(elevatorSpeed);
+		} else {
+			_elevate.set(0);
+		}
+
+
 	}
 
 	private void initCamera() {

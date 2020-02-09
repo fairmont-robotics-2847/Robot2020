@@ -8,7 +8,7 @@ public class Ball implements IActor {
     WPI_VictorSPX _conveyorMotor = new WPI_VictorSPX(3);
     WPI_VictorSPX _flyWheelMotor = new WPI_VictorSPX(4);
 
-    static final double kIntakeMotorSpeed = 1.0;
+    static final double kIntakeMotorSpeed = -1.0;
     static final double kConveyorMotorSpeed = 1.0;
     static final double kFlyWheelMotorSpeed = 0.7;
 
@@ -18,7 +18,7 @@ public class Ball implements IActor {
     };
 
     boolean ballReadyToConvey() {
-        return _ballReadyToConvey[0].get() && _ballReadyToConvey[1].get();
+        return !_ballReadyToConvey[0].get() && !_ballReadyToConvey[1].get();  // sensors output false when detecting balls
     }
 
     public void init() {
