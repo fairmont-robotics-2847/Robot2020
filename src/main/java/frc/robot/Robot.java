@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.*;
 public class Robot extends TimedRobot implements ICommander {
 	Joystick _joy = new Joystick(0);
 	Drive _drive = new Drive(this);
-	Ball _ball = new Ball(); // TODO: once a constructor that takes a ICommander has been added, pass in a reference to ourself (this)
+	Ball _ball = new Ball(this);
 
 	// TODO: move elevator control to a seperate file (e.g. Elevator.java)
 	WPI_VictorSPX _elevate = new WPI_VictorSPX(7);
