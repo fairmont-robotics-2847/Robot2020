@@ -59,8 +59,14 @@ public class Ball implements IActor {
             } else {
                 _flyWheelMotor.set(0);
                 _conveyorMotor.set(0);
-                _commander.completed(_action);
+                IAction action = _action;
+                _action = null;
+                _commander.completed(action);
             }
+        } else if (_action instanceof StartIntake) {
+            // TODO: implement
+        } else if (_action instanceof StopIntake) {
+            // TODO: implement
         }
     }
 
@@ -69,18 +75,17 @@ public class Ball implements IActor {
             _action = action;
             _shootStartedAt = _timer.get();
             return true;
-
-        /* TODO: we also need a set of actions for ball intake (maybe something like StartIntake
-           and StopIntake). When picking up balls, the intake motor should run, but the conveyor
-           should only run when indexing a ball into the path, which the robot should do when it
-           senses that a ball is in position (using the proximity sensors: see ballReadyToConvey). */
+        } else if (action instanceof StartIntake) {
+            // TODO: implement
+            return true;
+        } else if (action instanceof StopIntake) {
+            // TODO: implement
+            return true;
         } else {
             return false;
         }
     }
 
-    /* TODO: does the flywheel speed need to be adjusted, or can this be set as a constant (i.e.
-       see kFlyWheelMotorSpeed defined above)? */
     public void setFlyWheelSpeed(double speed) {
         _flyWheelMotor.set(speed);
     }

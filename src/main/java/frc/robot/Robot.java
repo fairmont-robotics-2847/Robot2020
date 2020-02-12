@@ -14,7 +14,7 @@ public class Robot extends TimedRobot implements ICommander {
 	Drive _drive = new Drive(this);
 	Ball _ball = new Ball(this);
 
-	// TODO: move elevator control to a seperate file (e.g. Elevator.java)
+	// TODO: move elevator control to a seperate file (e.g. Climber.java)
 	WPI_VictorSPX _elevate = new WPI_VictorSPX(7);
 
 	// Motor controllers should be declared and used in a separate class (e.g. Drive.java or Ball.java)
@@ -69,7 +69,7 @@ public class Robot extends TimedRobot implements ICommander {
 		boolean launch = _joy.getRawButton(7);
 		_ball.teleopPeriodic(intake, launch);
 
-		// TODO: Move elevator control to a separate file (e.g. Elevator.java)
+		// TODO: Move elevator control to a separate file (e.g. Climber.java)
 		// Elevator test
 		double elevatorSpeed = .2;
 		if (_joy.getRawButton(6)) {
