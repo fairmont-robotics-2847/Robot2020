@@ -33,7 +33,9 @@ public class Ball implements IActor {
     }
 
     public void init() {
-
+        _conveyorMotor.set(0);
+        _flyWheelMotor.set(0);
+        _intakeMotor.set(0);
     }
     
     public void teleopPeriodic(boolean intake, boolean launch){ 
@@ -51,23 +53,29 @@ public class Ball implements IActor {
             Shoot shoot = (Shoot)_action;
             double elapsedSinceStart = _timer.get() - _shootStartedAt; 
             if (elapsedSinceStart < 1) { // ramp time
-                _flyWheelMotor.set(shoot.getSpeed());
+                _flyWheelMotor.set(1); // Max speed to get flywheel up to speed as quickly as possible
                 _conveyorMotor.set(0);
             } else if (elapsedSinceStart < shoot.getTime()) {
-                _flyWheelMotor.set(shoot.getSpeed());
+                _flyWheelMotor.set(kFlyWheelMotorSpeed);
                 _conveyorMotor.set(kConveyorMotorSpeed);
             } else {
                 _flyWheelMotor.set(0);
                 _conveyorMotor.set(0);
-                IAction action = _action;
-                _action = null;
-                _commander.completed(action);
+                completed();
             }
         } else if (_action instanceof StartIntake) {
-            // TODO: implement
+            _conveyorMotor.set(kConveyorMotorSpeed);
+            completed();
         } else if (_action instanceof StopIntake) {
-            // TODO: implement
+            _conveyorMotor.set(0);
+            completed();
         }
+    }
+
+    void completed() {
+        IAction action = _action;
+        _action = null;
+        _commander.completed(action);
     }
 
     public boolean perform(IAction action) {
@@ -76,17 +84,13 @@ public class Ball implements IActor {
             _shootStartedAt = _timer.get();
             return true;
         } else if (action instanceof StartIntake) {
-            // TODO: implement
+            _action = action;
             return true;
         } else if (action instanceof StopIntake) {
-            // TODO: implement
+            _action = action;
             return true;
         } else {
             return false;
         }
-    }
-
-    public void setFlyWheelSpeed(double speed) {
-        _flyWheelMotor.set(speed);
     }
 }

@@ -1,7 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 
@@ -13,10 +11,9 @@ public class Robot extends TimedRobot implements ICommander {
 	Joystick _joy = new Joystick(0);
 	Drive _drive = new Drive(this);
 	Ball _ball = new Ball(this);
+	Climber _climber = new Climber();
 
-	// TODO: move elevator control to a seperate file (e.g. Climber.java)
-	WPI_VictorSPX _elevate = new WPI_VictorSPX(7);
-
+	
 	// Motor controllers should be declared and used in a separate class (e.g. Drive.java or Ball.java)
     /*WPI_VictorSPX _victor5 = new WPI_VictorSPX(5);
     WPI_VictorSPX _victor6 = new WPI_VictorSPX(6);
@@ -46,6 +43,7 @@ public class Robot extends TimedRobot implements ICommander {
 	}
 
 	public void autonomousInit() {
+		_ball.init();
 		if (_strategyChooser.getSelected() > 0 &&
 		    _strategyChooser.getSelected() <= _strategies.length) {
 			_strategy = _strategies[_strategyChooser.getSelected() - 1];
@@ -57,7 +55,11 @@ public class Robot extends TimedRobot implements ICommander {
 		_drive.autonomousPeriodic();
 		_ball.autonomousPeriodic();
 	}
-	
+
+	public void teleopInit() {
+		_ball.init();
+	}
+
     public void teleopPeriodic() {
 		// Drive control
 		double speed = -_joy.getY();
@@ -69,17 +71,19 @@ public class Robot extends TimedRobot implements ICommander {
 		boolean launch = _joy.getRawButton(7);
 		_ball.teleopPeriodic(intake, launch);
 
-		// TODO: Move elevator control to a separate file (e.g. Climber.java)
-		// Elevator test
-		double elevatorSpeed = .2;
-		if (_joy.getRawButton(6)) {
-			_elevate.set(-elevatorSpeed);
-		} else if (_joy.getRawButton(8)) {
-			_elevate.set(elevatorSpeed);
+		boolean up = _joy.getRawButton(8);
+		boolean down = _joy.getRawButton(6);
+		Climber.Direction direction;
+		if (up) {
+			direction = Climber.Direction.up;
+		} else if (down) {
+			direction = Climber.Direction.down;
 		} else {
-			_elevate.set(0);
+			direction = Climber.Direction.stopped;
 		}
+		_climber.teleopPeriodic(direction);
 	}
+
 
 	private void initCamera() {
 		// TODO: uncomment these lines when a camera is attached
