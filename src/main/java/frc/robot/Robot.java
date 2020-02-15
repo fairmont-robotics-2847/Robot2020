@@ -46,6 +46,7 @@ public class Robot extends TimedRobot implements ICommander {
 
 	public void autonomousInit() {
 		_ball.init();
+		_drive.initAuto();
 		if (_strategyChooser.getSelected() > 0 &&
 		    _strategyChooser.getSelected() <= _strategies.length) {
 			_strategy = _strategies[_strategyChooser.getSelected() - 1];
@@ -60,6 +61,7 @@ public class Robot extends TimedRobot implements ICommander {
 
 	public void teleopInit() {
 		_ball.init();
+		_drive.initTeleop();
 	}
 
     public void teleopPeriodic() {
@@ -73,11 +75,12 @@ public class Robot extends TimedRobot implements ICommander {
 		boolean reverseIntake = _joy.getRawButton(7);
 		boolean shoot = _joy.getRawButton(8);
 		boolean advanceBall = _joy.getRawButton(6);
+		boolean reverseBall = _joy.getRawButton(3);
 		boolean toggleBallSensorOn = _joy.getRawButton(9);
 		boolean toggleBallSensorOff = _joy.getRawButton(10);
 		if (toggleBallSensorOff) _ball.setUseBallSensor(false);
 		else if (toggleBallSensorOn) _ball.setUseBallSensor(true);
-		_ball.teleopPeriodic(intake, shoot, reverseIntake, advanceBall);
+		_ball.teleopPeriodic(intake, shoot, reverseIntake, advanceBall, reverseBall);
 
 		boolean up = _joy.getRawButton(4);
 		boolean down = _joy.getRawButton(2);

@@ -5,8 +5,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 public class Climber {
     WPI_VictorSPX _climberMotor = new WPI_VictorSPX(7);
 
-    static final double kElevatorSpeed = .3; //.6;
-
+    static final double kElevatorSpeed = .6;
 
     public enum Direction {
         up,

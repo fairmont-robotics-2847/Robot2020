@@ -2,6 +2,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
+
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.sensors.PigeonIMU;
@@ -36,6 +38,20 @@ public class Drive implements IActor {
     public void init() {
         _gyro.calibrate();
         _gyro.reset();
+    }
+
+    public void initTeleop() {
+        _frontRight.setNeutralMode(NeutralMode.Coast);
+        _frontLeft.setNeutralMode(NeutralMode.Coast);
+        _rearRight.setNeutralMode(NeutralMode.Coast);
+        _rearLeft.setNeutralMode(NeutralMode.Coast);
+    }
+
+    public void initAuto() {
+        _frontRight.setNeutralMode(NeutralMode.Brake);
+        _frontLeft.setNeutralMode(NeutralMode.Brake);
+        _rearRight.setNeutralMode(NeutralMode.Brake);
+        _rearLeft.setNeutralMode(NeutralMode.Brake);
     }
 
     public void teleopPeriodic(double speed, double rotation) {

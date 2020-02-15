@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.DigitalInput;
 
@@ -19,8 +20,11 @@ public class Ball implements IActor {
     WPI_VictorSPX _flyWheelMotor = new WPI_VictorSPX(4);
     
     Timer _timer = new Timer();
+    Timer _timer2 = new Timer();
     boolean _previousShoot = false;
     boolean _useBallSensor = true;
+    boolean _previousConveyor = false;
+    boolean _firstRunConveyor = false;
     public void setUseBallSensor(boolean value) {
         _useBallSensor = value;
     }
@@ -30,8 +34,9 @@ public class Ball implements IActor {
     }
 
     static final double kIntakeMotorSpeed = -1.0;
-    static final double kConveyorMotorSpeed = -1.0;
+    static final double kConveyorMotorSpeed = -0.5;
     static final double kFlyWheelMotorSpeed = 0.7;
+    static final double kConveyorSensorDelay = .35; // in seconds
     static final double kFlywheelRampTime = 1.0; // in seconds
 
     DigitalInput[] _ballReadyToConvey = {
@@ -40,33 +45,67 @@ public class Ball implements IActor {
     };
 
     boolean ballReadyToConvey() {
-        return !_ballReadyToConvey[0].get() && !_ballReadyToConvey[1].get();  // sensors output false when detecting balls
+        return !_ballReadyToConvey[0].get();  // sensors output false when detecting balls
+        //return false;
     }
 
     public void init() {
         _conveyorMotor.set(0);
         _flyWheelMotor.set(0);
         _intakeMotor.set(0);
+
+        _conveyorMotor.setNeutralMode(NeutralMode.Brake);
+        _flyWheelMotor.setNeutralMode(NeutralMode.Coast);
+        _intakeMotor.setNeutralMode(NeutralMode.Coast);
     }
     
-    public void teleopPeriodic(boolean intake, boolean shoot, boolean reverseIntake, boolean advanceBall) { 
+    public void teleopPeriodic(boolean intake, boolean shoot, boolean reverseIntake, boolean advanceBall, boolean reverseBall) { 
+        SmartDashboard.putBoolean("Use Ball Sensor", _useBallSensor);
+        SmartDashboard.putBoolean("Ball Sens 1", _ballReadyToConvey[0].get());
+        //SmartDashboard.putBoolean("Ball Sens 2", _ballReadyToConvey[1].get());
+        
         if (shoot && !_previousShoot) {
             System.out.println("Start shooting");
             _timer.start();
         }
+
+        boolean runConveyor = advanceBall || (_useBallSensor && ballReadyToConvey());
+        if (reverseBall) {
+            _conveyorMotor.set(-kConveyorMotorSpeed);
+        }
+        if (runConveyor && !_previousConveyor) {
+            System.out.println("Start conveyor");
+            _timer2.start();
+        }
+
+
         _previousShoot = shoot;
+        _previousConveyor = runConveyor;
         double intakeMotorSpeed;
         if (reverseIntake) intakeMotorSpeed = -kIntakeMotorSpeed;
         else if (intake) intakeMotorSpeed = kIntakeMotorSpeed;
         else intakeMotorSpeed = 0;
         _intakeMotor.set(intakeMotorSpeed);
+
         if (shoot) {
             runShooter(_timer.get());
             SmartDashboard.putNumber("time", _timer.get());
         } else {
-            boolean runConveyor = advanceBall || (_useBallSensor && ballReadyToConvey());
-            _conveyorMotor.set(runConveyor ? kConveyorMotorSpeed : 0.0);
             stopShooter();
+        }
+
+        if (runConveyor || _firstRunConveyor) {
+            _firstRunConveyor = runConveyor(_timer2.get());
+        } else {
+            _conveyorMotor.set(0);
+        }
+    }
+    private boolean runConveyor(double elapsed) {
+        if (elapsed < kConveyorSensorDelay) {
+            _conveyorMotor.set(kConveyorMotorSpeed);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -76,7 +115,7 @@ public class Ball implements IActor {
             _conveyorMotor.set(0);
         } else {
             _flyWheelMotor.set(kFlyWheelMotorSpeed);
-            _conveyorMotor.set(kConveyorMotorSpeed);
+            _conveyorMotor.set(-.9);
         }
     }
 
