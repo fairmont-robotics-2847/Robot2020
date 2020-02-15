@@ -24,7 +24,7 @@ public class Ball implements IActor {
     boolean _previousShoot = false;
     boolean _useBallSensor = true;
     boolean _previousConveyor = false;
-    boolean _firstRunConveyor = false;
+    boolean _currentlyRunningConveyor = false;
     public void setUseBallSensor(boolean value) {
         _useBallSensor = value;
     }
@@ -94,8 +94,8 @@ public class Ball implements IActor {
             stopShooter();
         }
 
-        if (runConveyor || _firstRunConveyor) {
-            _firstRunConveyor = runConveyor(_timer2.get());
+        if (runConveyor || _currentlyRunningConveyor) {
+            _currentlyRunningConveyor = runConveyor(_timer2.get());
         } else {
             _conveyorMotor.set(0);
         }
