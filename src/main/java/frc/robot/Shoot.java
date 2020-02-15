@@ -1,7 +1,7 @@
 package frc.robot;
 
 public class Shoot implements IAction {
-    Shoot (double time, double speed) {
+    Shoot (double time) {
         _time = time;
     }
     

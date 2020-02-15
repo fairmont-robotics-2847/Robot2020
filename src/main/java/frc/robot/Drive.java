@@ -33,8 +33,6 @@ public class Drive implements IActor {
     IAction _action;
     int _positionRef;
 
-    Ball _ball = new Ball();
-
     public void init() {
         _gyro.calibrate();
         _gyro.reset();
@@ -88,12 +86,6 @@ public class Drive implements IActor {
                 _action = null;
                 _commander.completed((IAction)turn);
             }
-        } else if (_action instanceof Shoot) {
-            Shoot shoot = (Shoot)_action;
-            boolean completed = _ball.perform(_action, shoot.getSpeed(), shoot.getTime());
-
-            if (completed) {_commander.completed((IAction)shoot);}
-
         }    
         reportDiagnostics();
 }

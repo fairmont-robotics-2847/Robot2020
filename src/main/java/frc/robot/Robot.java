@@ -25,8 +25,9 @@ public class Robot extends TimedRobot implements ICommander {
 	};
 
 	IStrategy[] _strategies = {
-		new SquareStrategy(),
-		new LineStrategy()
+		new Strategy1(),
+		new Strategy2(),
+		new Strategy3()
 	};
 	
 	IStrategy _strategy;
@@ -37,8 +38,9 @@ public class Robot extends TimedRobot implements ICommander {
 		initCamera();
 		_drive.init();
 		_ball.init();
-		_strategyChooser.setDefaultOption("Square", 1);
-  	    _strategyChooser.addOption("Line", 2);
+		_strategyChooser.setDefaultOption(_strategies[0].getName(), 1);
+		_strategyChooser.addOption(_strategies[1].getName(), 2);
+		_strategyChooser.addOption(_strategies[2].getName(), 3);
 		SmartDashboard.putData("Strategy", _strategyChooser);
 	}
 
@@ -68,11 +70,17 @@ public class Robot extends TimedRobot implements ICommander {
 		
 		// Ball Control
 		boolean intake = _joy.getRawButton(5);
-		boolean launch = _joy.getRawButton(7);
-		_ball.teleopPeriodic(intake, launch);
+		boolean reverseIntake = _joy.getRawButton(7);
+		boolean shoot = _joy.getRawButton(8);
+		boolean advanceBall = _joy.getRawButton(6);
+		boolean toggleBallSensorOn = _joy.getRawButton(9);
+		boolean toggleBallSensorOff = _joy.getRawButton(10);
+		if (toggleBallSensorOff) _ball.setUseBallSensor(false);
+		else if (toggleBallSensorOn) _ball.setUseBallSensor(true);
+		_ball.teleopPeriodic(intake, shoot, reverseIntake, advanceBall);
 
-		boolean up = _joy.getRawButton(8);
-		boolean down = _joy.getRawButton(6);
+		boolean up = _joy.getRawButton(4);
+		boolean down = _joy.getRawButton(2);
 		Climber.Direction direction;
 		if (up) {
 			direction = Climber.Direction.up;

@@ -5,7 +5,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 public class Climber {
     WPI_VictorSPX _climberMotor = new WPI_VictorSPX(7);
 
-    static final double kElevatorSpeed = .2;
+    static final double kElevatorSpeed = .3; //.6;
 
 
     public enum Direction {
@@ -15,9 +15,9 @@ public class Climber {
     }
 
     public void teleopPeriodic(Direction direction) {
-		if (direction == Direction.down) {
+		if (direction == Direction.up) {
 			_climberMotor.set(-kElevatorSpeed);
-		} else if (direction == Direction.up) {
+		} else if (direction == Direction.down) {
 			_climberMotor.set(kElevatorSpeed);
 		} else {
 			_climberMotor.set(0);

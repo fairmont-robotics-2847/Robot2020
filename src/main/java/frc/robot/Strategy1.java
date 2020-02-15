@@ -1,14 +1,22 @@
 package frc.robot;
 
-public class LineStrategy implements IStrategy {
-    LineStrategy() {
+// This is an example of a simple strategy that causes the robot to drive in a square
+
+public class Strategy1 implements IStrategy {
+    Strategy1() {
         begin();
     }
 
+    public String getName() {
+        return "Strategy1";
+    }
+
     IAction[] _actions = {
-        new Move(10)  
+        new Move(1),
+        new Turn(87.2)
     };
-    int _action;
+  
+	int _action;
 
     public void begin() {
         _action = 0;
