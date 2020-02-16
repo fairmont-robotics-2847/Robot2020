@@ -33,10 +33,12 @@ public class Ball implements IActor {
         return _useBallSensor;
     }
 
-    static final double kIntakeMotorSpeed = -1.0;
-    static final double kConveyorMotorSpeed = -0.5;
-    static final double kFlyWheelMotorSpeed = 0.7;
-    static final double kConveyorSensorDelay = .5; // in seconds
+    static final double kIntakeMotorSpeed = 1.0;
+    static final double kConveyorMotorSpeed = 0.5;
+    static final double kFlyWheelMotorSpeed = 1.0;
+    static final double kShootConveyorSpeed = 0.7;
+
+    static final double kConveyorSensorDelay = 0.5; // in seconds
     static final double kFlywheelRampTime = 1.0; // in seconds
 
     DigitalInput[] _ballReadyToConvey = {
@@ -54,6 +56,9 @@ public class Ball implements IActor {
         _flyWheelMotor.set(0);
         _intakeMotor.set(0);
 
+        _conveyorMotor.setInverted(true);
+        _intakeMotor.setInverted(true);
+
         _conveyorMotor.setNeutralMode(NeutralMode.Brake);
         _flyWheelMotor.setNeutralMode(NeutralMode.Coast);
         _intakeMotor.setNeutralMode(NeutralMode.Coast);
@@ -70,10 +75,7 @@ public class Ball implements IActor {
         }
 
         boolean runConveyor = advanceBall || (_useBallSensor && ballReadyToConvey());
-        if (reverseBall) {
-            _conveyorMotor.set(-kConveyorMotorSpeed);
-        }
-        if (runConveyor && !_previousConveyor) {
+        if ((runConveyor && !_previousConveyor) && !reverseBall) {
             System.out.println("Start conveyor");
             _timer2.start();
         }
@@ -94,7 +96,9 @@ public class Ball implements IActor {
             stopShooter();
         }
 
-        if (runConveyor || _currentlyRunningConveyor) {
+        if (reverseBall) {
+            _conveyorMotor.set(-kConveyorMotorSpeed);
+        } else if (runConveyor || _currentlyRunningConveyor) {
             _currentlyRunningConveyor = runConveyor(_timer2.get());
         } else if (!shoot) {
             _conveyorMotor.set(0);
@@ -115,7 +119,7 @@ public class Ball implements IActor {
             _conveyorMotor.set(0);
         } else {
             _flyWheelMotor.set(kFlyWheelMotorSpeed);
-            _conveyorMotor.set(-.9);
+            _conveyorMotor.set(kShootConveyorSpeed);
         }
     }
 

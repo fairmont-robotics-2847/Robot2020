@@ -11,12 +11,7 @@ public class Strategy3 implements IStrategy {
 
     IAction[] _actions = {
         new Move(10),
-        // shoot 
-        new Move(-3),
-        new Turn(90),
-        new Move(4),
-        new Turn(90),
-        new Move(12)
+        new Shoot(4)
     };
     int _action;
 

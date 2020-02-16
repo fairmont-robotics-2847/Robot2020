@@ -91,7 +91,7 @@ public class Drive implements IActor {
             double heading = getHeading();
             
             // Slow down when we are near the heading target 
-            double rotation = Math.abs(turn.getGoal() - heading) > 15 ? 0.4 : 0.3;
+            double rotation = Math.abs(turn.getGoal() - heading) > 15 ? 0.65 : 0.5;
 
             if (turn.getGoal() > 0 && heading < turn.getGoal() - 1.0) {
                 _drive.arcadeDrive(0, rotation);
