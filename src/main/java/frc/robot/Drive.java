@@ -9,7 +9,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 
-
+import edu.wpi.first.wpilibj.Timer;
 
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,6 +27,8 @@ public class Drive implements IActor {
     WPI_TalonSRX _frontLeft = new WPI_TalonSRX(1);
     WPI_VictorSPX _rearLeft = new WPI_VictorSPX(1);
 
+    Timer _timer = new Timer();
+
     SpeedControllerGroup _left = new SpeedControllerGroup(_frontLeft, _rearLeft);    
     SpeedControllerGroup _right = new SpeedControllerGroup(_frontRight, _rearRight);
     DifferentialDrive _drive = new DifferentialDrive(_left, _right);
@@ -34,6 +36,7 @@ public class Drive implements IActor {
     PigeonIMU _gyroPIMU = new PigeonIMU(0);
     IAction _action;
     int _positionRef;
+    boolean _previousSleep = false;
 
     public void init() {
         _gyro.calibrate();
@@ -102,7 +105,24 @@ public class Drive implements IActor {
                 _action = null;
                 _commander.completed((IAction)turn);
             }
-        }    
+        } else if (_action instanceof Sleep) {
+            Sleep sleep = (Sleep)_action;
+            double waitTime = sleep.getTime();
+
+            if (!_previousSleep) {
+                System.out.println("Start sleep");
+                _timer.start();
+                _previousSleep = true;
+            } 
+
+            if (wait(waitTime, _timer.get())) {
+                System.out.println("End sleep");
+                _previousSleep = false;
+                _action = null;
+                _commander.completed((IAction)sleep);
+            }
+
+        }
         reportDiagnostics();
 }
 
@@ -117,6 +137,15 @@ public class Drive implements IActor {
             return false;
         }
     }
+
+    private boolean wait(double sleep, double elapsed) {
+        if (elapsed < sleep) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     private double getPosition() {
         return (_frontRight.getSensorCollection().getQuadraturePosition() - _positionRef) / 2600.0;
