@@ -36,6 +36,13 @@ public class Drive implements IActor {
     IAction _action;
     int _positionRef;
     
+    double kDeadbandAmmount = 0.1;
+    
+    double kAutonomousSpeed = 0.6;
+    double kAutonomousRotation = 0.65;
+    double kAutonomousFineRotation = 0.5;
+    double kTeleopSpeed = 0.7;
+    double kTeleopRotation = 0.7;
     double kClosedLoopRampTime = 0.5; // in seconds
     double kOpenLoopRampTime = 0.5; // in seconds
 
@@ -69,7 +76,10 @@ public class Drive implements IActor {
     }
 
     public void teleopPeriodic(double speed, double rotation) {
-        _drive.arcadeDrive(speed * 0.7, rotation * 0.7); //commented for ramp-up and deadband testing
+        double Speed = deadband(speed) * kTeleopSpeed;
+        double Rotation = deadband(rotation) * kTeleopRotation;
+
+        _drive.arcadeDrive(Speed, Rotation);
         reportDiagnostics();
     }
 
@@ -83,7 +93,7 @@ public class Drive implements IActor {
             double heading = getHeading();
             
             // Slow down when we our near the target position
-            double speed = Math.abs(move.getGoal() - position) < 2.0 ? 0.4 : 0.6;
+            double speed = Math.abs(move.getGoal() - position) < 2.0 ? 0.4 : kAutonomousSpeed;
 
             // Add rotation to correct heading errors
             double rotation;
@@ -105,7 +115,7 @@ public class Drive implements IActor {
             double heading = getHeading();
             
             // Slow down when we are near the heading target 
-            double rotation = Math.abs(turn.getGoal() - heading) > 15 ? 0.65 : 0.5;
+            double rotation = Math.abs(turn.getGoal() - heading) > 15 ? kAutonomousRotation : kAutonomousFineRotation;
 
             if (turn.getGoal() > 0 && heading < turn.getGoal() - 1.0) {
                 _drive.arcadeDrive(0, rotation);
@@ -138,6 +148,11 @@ public class Drive implements IActor {
 
     private void resetPosition() {
         _positionRef = _frontRight.getSensorCollection().getQuadraturePosition();
+    }
+
+    private double deadband(double value) {
+        if (Math.abs(value) > kDeadbandAmmount) {return value;}
+        else {return 0;}
     }
 
     private double getHeading() {
