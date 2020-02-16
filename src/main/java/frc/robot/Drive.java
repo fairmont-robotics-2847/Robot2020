@@ -35,14 +35,23 @@ public class Drive implements IActor {
 
     IAction _action;
     int _positionRef;
-
-    double kMinimumMotorOutput = 0.4;
-    double kdeadbandAmmount = 0.1;
-    double kspeedGain = 1.0; // scales exponentially
+    
+    double kClosedLoopRampTime = 0.5; // in seconds
+    double kOpenLoopRampTime = 0.5; // in seconds
 
     public void init() {
         _gyro.calibrate();
         _gyro.reset();
+
+        _frontRight.configClosedloopRamp(kClosedLoopRampTime);
+        _frontLeft.configClosedloopRamp(kClosedLoopRampTime);
+        _rearRight.configClosedloopRamp(kClosedLoopRampTime);
+        _rearLeft.configClosedloopRamp(kClosedLoopRampTime);
+
+        _frontRight.configOpenloopRamp(kOpenLoopRampTime);
+        _frontLeft.configOpenloopRamp(kOpenLoopRampTime);
+        _rearRight.configOpenloopRamp(kOpenLoopRampTime);
+        _rearLeft.configOpenloopRamp(kOpenLoopRampTime);
     }
 
     public void initTeleop() {
@@ -60,10 +69,7 @@ public class Drive implements IActor {
     }
 
     public void teleopPeriodic(double speed, double rotation) {
-        double Speed = joystickConditioning(speed);
-
-        //_drive.arcadeDrive(speed * 0.7, rotation * 0.7); //commented for ramp-up and deadband testing
-        _drive.arcadeDrive(Speed, rotation);
+        _drive.arcadeDrive(speed * 0.7, rotation * 0.7); //commented for ramp-up and deadband testing
         reportDiagnostics();
     }
 
@@ -132,16 +138,6 @@ public class Drive implements IActor {
 
     private void resetPosition() {
         _positionRef = _frontRight.getSensorCollection().getQuadraturePosition();
-    }
-
-    public double joystickConditioning(double speed) {
-        double output = 0;
-        boolean run = speed > 0;
-        if (Math.abs(speed) > kdeadbandAmmount) {
-            output = (kMinimumMotorOutput - ((kMinimumMotorOutput) - 1) * Math.pow(((kdeadbandAmmount - speed) / (kdeadbandAmmount - 1)), kspeedGain));
-            output *= run ? 1 : -1;
-        }
-        return output;
     }
 
     private double getHeading() {
