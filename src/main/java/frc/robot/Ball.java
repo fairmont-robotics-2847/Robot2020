@@ -36,7 +36,7 @@ public class Ball implements IActor {
     static final double kIntakeMotorSpeed = -1.0;
     static final double kConveyorMotorSpeed = -0.5;
     static final double kFlyWheelMotorSpeed = 0.7;
-    static final double kConveyorSensorDelay = .35; // in seconds
+    static final double kConveyorSensorDelay = .5; // in seconds
     static final double kFlywheelRampTime = 1.0; // in seconds
 
     DigitalInput[] _ballReadyToConvey = {
@@ -96,7 +96,7 @@ public class Ball implements IActor {
 
         if (runConveyor || _currentlyRunningConveyor) {
             _currentlyRunningConveyor = runConveyor(_timer2.get());
-        } else {
+        } else if (!shoot) {
             _conveyorMotor.set(0);
         }
     }
