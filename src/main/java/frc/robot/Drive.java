@@ -32,8 +32,13 @@ public class Drive implements IActor {
     DifferentialDrive _drive = new DifferentialDrive(_left, _right);
     ADXRS450_Gyro _gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
     PigeonIMU _gyroPIMU = new PigeonIMU(0);
+
     IAction _action;
     int _positionRef;
+
+    double kMinimumMotorOutput = 0.4;
+    double kdeadbandAmmount = 0.1;
+    double kspeedGain = 1.0; // scales exponentially
 
     public void init() {
         _gyro.calibrate();
@@ -55,7 +60,10 @@ public class Drive implements IActor {
     }
 
     public void teleopPeriodic(double speed, double rotation) {
-        _drive.arcadeDrive(speed * 0.7, rotation * 0.7);
+        double Speed = joystickConditioning(speed);
+
+        //_drive.arcadeDrive(speed * 0.7, rotation * 0.7); //commented for ramp-up and deadband testing
+        _drive.arcadeDrive(Speed, rotation);
         reportDiagnostics();
     }
 
@@ -124,6 +132,16 @@ public class Drive implements IActor {
 
     private void resetPosition() {
         _positionRef = _frontRight.getSensorCollection().getQuadraturePosition();
+    }
+
+    public double joystickConditioning(double speed) {
+        double output = 0;
+        boolean run = speed > 0;
+        if (Math.abs(speed) > kdeadbandAmmount) {
+            output = (kMinimumMotorOutput - ((kMinimumMotorOutput) - 1) * Math.pow(((kdeadbandAmmount - speed) / (kdeadbandAmmount - 1)), kspeedGain));
+            output *= run ? 1 : -1;
+        }
+        return output;
     }
 
     private double getHeading() {
