@@ -1,10 +1,11 @@
 package frc.robot;
 
 public class Sleep implements IAction {
-  Sleep (double time) {
-      _time = time;
+  Sleep (double duration) {
+      _duration = duration;
   }
-  private double _time;
-  public double getTime() { return _time; }
+
+  private double _duration;
+  public double getDuration() { return _duration; }
 }
 

@@ -36,7 +36,6 @@ public class Drive implements IActor {
     PigeonIMU _gyroPIMU = new PigeonIMU(0);
     IAction _action;
     int _positionRef;
-    boolean _previousSleep = false;
 
     public void init() {
         _gyro.calibrate();
@@ -107,24 +106,14 @@ public class Drive implements IActor {
             }
         } else if (_action instanceof Sleep) {
             Sleep sleep = (Sleep)_action;
-            double waitTime = sleep.getTime();
-
-            if (!_previousSleep) {
-                System.out.println("Start sleep");
-                _timer.start();
-                _previousSleep = true;
-            } 
-
-            if (wait(waitTime, _timer.get())) {
+            if (doneSleeping(sleep.getDuration())) {
                 System.out.println("End sleep");
-                _previousSleep = false;
                 _action = null;
                 _commander.completed((IAction)sleep);
             }
-
         }
         reportDiagnostics();
-}
+    }
 
     public boolean perform(IAction action) {
         if (action instanceof Move ||
@@ -133,19 +122,19 @@ public class Drive implements IActor {
             resetPosition();
             resetHeading();
             return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean wait(double sleep, double elapsed) {
-        if (elapsed < sleep) {
-            return false;
-        } else {
+        } else if (action instanceof Sleep) {
+            _action = action;
+            System.out.println("Start sleep");
+            _timer.start();
             return true;
+        } else {
+            return false;
         }
     }
 
+    private boolean doneSleeping(double sleep) {
+        return _timer.get() < sleep;
+    }
 
     private double getPosition() {
         return (_frontRight.getSensorCollection().getQuadraturePosition() - _positionRef) / 2600.0;

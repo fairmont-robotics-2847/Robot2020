@@ -133,7 +133,7 @@ public class Ball implements IActor {
         } else if (_action instanceof Shoot) {
             Shoot shoot = (Shoot)_action;
             double elapsed = _timer.get();
-            if (elapsed < shoot.getTime()) {
+            if (elapsed < shoot.getDuration()) {
                 runShooter(elapsed);
             } else {
                 stopShooter();
