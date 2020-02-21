@@ -16,7 +16,7 @@ public class Strategy4 implements IStrategy {
         new Move(5.08),
         new Turn(-90),
         new StopIntake(),
-        new Move(
+        new Move(0)
     };
     int _action;
 

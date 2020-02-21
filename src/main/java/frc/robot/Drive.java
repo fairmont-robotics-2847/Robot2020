@@ -45,10 +45,22 @@ public class Drive implements IActor {
     private static final double kMoveFastSpeed = 0.59;
     private static final double kMoveSlowSpeed = 0.41;
     private static final double kMoveTurnAdjustment = 0.225;
+    private static final double kClosedLoopRampTime = 0.5; // in seconds
+    private static final double kOpenLoopRampTime = 0.5; // in seconds
 
     public void init() {
         _gyro.calibrate();
         _gyro.reset();
+
+        _frontRight.configClosedloopRamp(kClosedLoopRampTime);
+        _frontLeft.configClosedloopRamp(kClosedLoopRampTime);
+        _rearRight.configClosedloopRamp(kClosedLoopRampTime);
+        _rearLeft.configClosedloopRamp(kClosedLoopRampTime);
+
+        _frontRight.configOpenloopRamp(kOpenLoopRampTime);
+        _frontLeft.configOpenloopRamp(kOpenLoopRampTime);
+        _rearRight.configOpenloopRamp(kOpenLoopRampTime);
+        _rearLeft.configOpenloopRamp(kOpenLoopRampTime);
     }
 
     public void initTeleop() {
