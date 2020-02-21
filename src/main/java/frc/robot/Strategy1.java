@@ -8,12 +8,18 @@ public class Strategy1 implements IStrategy {
     }
 
     public String getName() {
-        return "Move_and_Shoot";
+        return "Drive forward, hit up the trench";
     }
 
     IAction[] _actions = {
-        new Move(10),
-        new Shoot(4)
+        new Move (11),
+        new Shoot(6),
+        new Move(-3),
+        new Turn(90),
+        new Move (5.56),
+        new Turn(90),
+        new StartIntake(),
+        new Move(23)
     };
   
 	int _action;

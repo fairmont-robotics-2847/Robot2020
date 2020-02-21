@@ -27,7 +27,8 @@ public class Robot extends TimedRobot implements ICommander {
 	IStrategy[] _strategies = {
 		new Strategy1(),
 		new Strategy2(),
-		new Strategy3()
+		new Strategy3(),
+		new Strategy4()
 	};
 	
 	IStrategy _strategy;
@@ -41,6 +42,7 @@ public class Robot extends TimedRobot implements ICommander {
 		_strategyChooser.setDefaultOption(_strategies[0].getName(), 1);
 		_strategyChooser.addOption(_strategies[1].getName(), 2);
 		_strategyChooser.addOption(_strategies[2].getName(), 3);
+		_strategyChooser.addOption(_strategies[3].getName(), 4);
 		SmartDashboard.putData("Strategy", _strategyChooser);
 	}
 

@@ -1,20 +1,22 @@
 package frc.robot;
 
-public class Strategy2 implements IStrategy {
-    Strategy2() {
+public class Strategy4 implements IStrategy {
+    Strategy4() {
         begin();
     }
 
     public String getName() {
-        return "Flip a Uie";
+        return "Skrrrrrt route";
     }
 
     IAction[] _actions = {
-        new Sleep(5),
+        new StartIntake(),
+        new Move(0),
+        new Turn(-90),
         new Move(5.08),
         new Turn(-90),
-        new Move(10),
-        new Shoot(6)
+        new StopIntake(),
+        new Move(
     };
     int _action;
 

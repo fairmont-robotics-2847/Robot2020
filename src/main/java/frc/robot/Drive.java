@@ -37,6 +37,15 @@ public class Drive implements IActor {
     IAction _action;
     int _positionRef;
 
+    private static final double kTurnAnticipationAngle = 30.0;
+    private static final double kTurnFastSpeed = 0.65;
+    private static final double kTurnSlowSpeed = 0.4;
+
+    private static final double kMoveAnticipationDistance = 2.0;
+    private static final double kMoveFastSpeed = 0.59;
+    private static final double kMoveSlowSpeed = 0.41;
+    private static final double kMoveTurnAdjustment = 0.225;
+
     public void init() {
         _gyro.calibrate();
         _gyro.reset();
@@ -71,12 +80,12 @@ public class Drive implements IActor {
             double heading = getHeading();
             
             // Slow down when we our near the target position
-            double speed = Math.abs(move.getGoal() - position) < 2.0 ? 0.4 : 0.6;
+            double speed = Math.abs(move.getGoal() - position) < kMoveAnticipationDistance ? kMoveSlowSpeed : kMoveFastSpeed;
 
             // Add rotation to correct heading errors
             double rotation;
-            if (heading < 0) rotation = 0.2;
-            else if (heading > 0) rotation = -0.2;
+            if (heading < 0) rotation = kMoveTurnAdjustment;
+            else if (heading > 0) rotation = -kMoveTurnAdjustment;
             else rotation = 0;
             
             if (move.getGoal() > 0 && position < move.getGoal()) {
@@ -93,7 +102,7 @@ public class Drive implements IActor {
             double heading = getHeading();
             
             // Slow down when we are near the heading target 
-            double rotation = Math.abs(turn.getGoal() - heading) > 15 ? 0.65 : 0.5;
+            double rotation = Math.abs(turn.getGoal() - heading) > kTurnAnticipationAngle ? kTurnFastSpeed : kTurnSlowSpeed; // was .4 & .3
 
             if (turn.getGoal() > 0 && heading < turn.getGoal() - 1.0) {
                 _drive.arcadeDrive(0, rotation);
@@ -106,6 +115,7 @@ public class Drive implements IActor {
             }
         } else if (_action instanceof Sleep) {
             Sleep sleep = (Sleep)_action;
+            System.out.println(_timer.get());
             if (doneSleeping(sleep.getDuration())) {
                 System.out.println("End sleep");
                 _action = null;
@@ -133,7 +143,7 @@ public class Drive implements IActor {
     }
 
     private boolean doneSleeping(double sleep) {
-        return _timer.get() < sleep;
+        return _timer.get() > sleep;
     }
 
     private double getPosition() {

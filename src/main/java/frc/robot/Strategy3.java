@@ -6,12 +6,14 @@ public class Strategy3 implements IStrategy {
     }
 
     public String getName() {
-        return "Strategy3";
+        return "Literally just drive forward and pick up trench balls";
     }
 
     IAction[] _actions = {
-        new Move(10),
-        new Shoot(4)
+        new StartIntake(),
+        new Move(10.84),
+        new Turn(-90),
+        new Move(2)
     };
     int _action;
 
