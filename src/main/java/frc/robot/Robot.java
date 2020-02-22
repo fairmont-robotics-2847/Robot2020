@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.*;
 
 public class Robot extends TimedRobot implements ICommander {
 	Joystick _joy = new Joystick(0);
+	Joystick _stick = new Joystick(1);
 	Drive _drive = new Drive(this);
 	Ball _ball = new Ball(this);
 	Climber _climber = new Climber();
@@ -73,13 +74,13 @@ public class Robot extends TimedRobot implements ICommander {
 		_drive.teleopPeriodic(speed, rotation);
 		
 		// Ball Control
-		boolean intake = _joy.getRawButton(5);
-		boolean reverseIntake = _joy.getRawButton(7);
-		boolean shoot = _joy.getRawButton(8);
-		boolean advanceBall = _joy.getRawButton(6);
-		boolean reverseBall = _joy.getRawButton(3);
-		boolean toggleBallSensorOn = _joy.getRawButton(9);
-		boolean toggleBallSensorOff = _joy.getRawButton(10);
+		boolean intake = _stick.getRawButton(1);
+		boolean reverseIntake = _stick.getRawButton(2);
+		boolean shoot = _stick.getRawButton(3);
+		boolean advanceBall = _stick.getRawButton(6);
+		boolean reverseBall = _stick.getRawButton(7);
+		boolean toggleBallSensorOn = _stick.getRawButton(8);
+		boolean toggleBallSensorOff = _stick.getRawButton(9);
 		if (toggleBallSensorOff) _ball.setUseBallSensor(false);
 		else if (toggleBallSensorOn) _ball.setUseBallSensor(true);
 		_ball.teleopPeriodic(intake, shoot, reverseIntake, advanceBall, reverseBall);

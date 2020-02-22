@@ -34,11 +34,11 @@ public class Ball implements IActor {
     }
 
     static final double kIntakeMotorSpeed = 1.0;
-    static final double kConveyorMotorSpeed = 0.7;
+    static final double kConveyorMotorSpeed = 1.0;
     static final double kFlyWheelMotorSpeed = 1.0;
-    static final double kShootConveyorSpeed = 0.7;
+    static final double kShootConveyorSpeed = 0.85;
 
-    static final double kConveyorSensorDelay = 0.275; // in seconds
+    static final double kConveyorSensorDelay = 0.27; // in seconds
     static final double kFlywheelRampTime = 1.0; // in seconds
 
     DigitalInput[] _ballReadyToConvey = {
