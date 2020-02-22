@@ -7,19 +7,19 @@ public class Climber {
 
     static final double kElevatorSpeed = .6;
 
-    public enum Direction {
-        up,
-        down,
+    public enum Operation {
+        Reset,
+        Climb,
         stopped
     }
 
-    public void teleopPeriodic(Direction direction) {
-		if (direction == Direction.up) {
+    public void teleopPeriodic(Operation direction) {
+		if (direction == Operation.Reset) {
 			_climberMotor.set(-kElevatorSpeed);
-		} else if (direction == Direction.down) {
+		} else if (direction == Operation.Climb) {
 			_climberMotor.set(kElevatorSpeed);
 		} else {
-			_climberMotor.set(0.1);
+			_climberMotor.set(-0.1); // This is because of climber slowly rising
 		}
     }     
 }

@@ -10,11 +10,12 @@ public class Strategy2 implements IStrategy {
     }
 
     IAction[] _actions = {
-        new Sleep(5),
-        new Move(5.08),
+        new Move(5),
+        new Turn(90),
+        new Move(6),
         new Turn(-90),
-        new Move(10),
-        new Shoot(6)
+        new Move(4),
+        new Shoot(3)
     };
     int _action;
 

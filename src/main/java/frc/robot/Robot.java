@@ -85,17 +85,17 @@ public class Robot extends TimedRobot implements ICommander {
 		else if (toggleBallSensorOn) _ball.setUseBallSensor(true);
 		_ball.teleopPeriodic(intake, shoot, reverseIntake, advanceBall, reverseBall);
 
-		boolean up = _joy.getRawButton(4);
-		boolean down = _joy.getRawButton(2);
-		Climber.Direction direction;
-		if (up) {
-			direction = Climber.Direction.up;
-		} else if (down) {
-			direction = Climber.Direction.down;
+		boolean reset = _joy.getRawButton(4);
+		boolean climb = _joy.getRawButton(2);
+		Climber.Operation operation;
+		if (reset) {
+			operation = Climber.Operation.Reset;
+		} else if (climb) {
+			operation = Climber.Operation.Climb;
 		} else {
-			direction = Climber.Direction.stopped;
+			operation = Climber.Operation.stopped;
 		}
-		_climber.teleopPeriodic(direction);
+		_climber.teleopPeriodic(operation);
 	}
 
 

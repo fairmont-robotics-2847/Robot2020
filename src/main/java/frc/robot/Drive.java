@@ -27,7 +27,8 @@ public class Drive implements IActor {
     WPI_TalonSRX _frontLeft = new WPI_TalonSRX(1);
     WPI_VictorSPX _rearLeft = new WPI_VictorSPX(1);
 
-    Timer _timer = new Timer();
+    Timer _sleepTimer = new Timer();
+    Timer _driveTimer = new Timer();
 
     SpeedControllerGroup _left = new SpeedControllerGroup(_frontLeft, _rearLeft);    
     SpeedControllerGroup _right = new SpeedControllerGroup(_frontRight, _rearRight);
@@ -37,13 +38,13 @@ public class Drive implements IActor {
     IAction _action;
     int _positionRef;
 
-    private static final double kTurnAnticipationAngle = 30.0;
+    private static final double kTurnAnticipationAngle = 45.0; // was 30
     private static final double kTurnFastSpeed = 0.65;
-    private static final double kTurnSlowSpeed = 0.4;
+    private static final double kTurnSlowSpeed = 0.45; // was .4
 
     private static final double kMoveAnticipationDistance = 2.0;
-    private static final double kMoveFastSpeed = 0.59;
-    private static final double kMoveSlowSpeed = 0.41;
+    private static final double kMoveFastSpeed = 0.7; // was .59
+    private static final double kMoveSlowSpeed = 0.5; // was .41
     private static final double kMoveTurnAdjustment = 0.225;
     private static final double kClosedLoopRampTime = 0.5; // in seconds
     private static final double kOpenLoopRampTime = 0.5; // in seconds
@@ -78,7 +79,7 @@ public class Drive implements IActor {
     }
 
     public void teleopPeriodic(double speed, double rotation) {
-        _drive.arcadeDrive(speed * 0.7, rotation * 0.7);
+        _drive.arcadeDrive(speed * 0.9, rotation * 0.7); // speed was 0.7
         reportDiagnostics();
     }
 
@@ -90,6 +91,7 @@ public class Drive implements IActor {
             Move move = (Move)_action;
             double position = getPosition();
             double heading = getHeading();
+            _driveTimer.start();
             
             // Slow down when we our near the target position
             double speed = Math.abs(move.getGoal() - position) < kMoveAnticipationDistance ? kMoveSlowSpeed : kMoveFastSpeed;
@@ -99,11 +101,18 @@ public class Drive implements IActor {
             if (heading < 0) rotation = kMoveTurnAdjustment;
             else if (heading > 0) rotation = -kMoveTurnAdjustment;
             else rotation = 0;
+
+            System.out.println("Drive: Goal: " + move.getGoal() + "; position: " + position);
+            if (Math.abs(_frontRight.getStatorCurrent()) > 50.0) {
             
+            } else {
+
+            }
             if (move.getGoal() > 0 && position < move.getGoal()) {
                 _drive.arcadeDrive(speed, rotation);
             } else if (move.getGoal() < 0 && position > move.getGoal()) {
-                _drive.arcadeDrive(-speed, -rotation);
+                //_drive.arcadeDrive(-speed, -rotation);
+                _drive.arcadeDrive(-speed, rotation);
             } else {
                 move.complete(position, heading);
                 _action = null;
@@ -116,6 +125,7 @@ public class Drive implements IActor {
             // Slow down when we are near the heading target 
             double rotation = Math.abs(turn.getGoal() - heading) > kTurnAnticipationAngle ? kTurnFastSpeed : kTurnSlowSpeed; // was .4 & .3
 
+            System.out.println("Drive: Goal: " + turn.getGoal() + "; heading: " + heading);
             if (turn.getGoal() > 0 && heading < turn.getGoal() - 1.0) {
                 _drive.arcadeDrive(0, rotation);
             } else if (turn.getGoal() < 0 && heading > turn.getGoal() + 1.0) {
@@ -127,7 +137,7 @@ public class Drive implements IActor {
             }
         } else if (_action instanceof Sleep) {
             Sleep sleep = (Sleep)_action;
-            System.out.println(_timer.get());
+            System.out.println(_sleepTimer.get());
             if (doneSleeping(sleep.getDuration())) {
                 System.out.println("End sleep");
                 _action = null;
@@ -147,7 +157,7 @@ public class Drive implements IActor {
         } else if (action instanceof Sleep) {
             _action = action;
             System.out.println("Start sleep");
-            _timer.start();
+            _sleepTimer.start();
             return true;
         } else {
             return false;
@@ -155,7 +165,7 @@ public class Drive implements IActor {
     }
 
     private boolean doneSleeping(double sleep) {
-        return _timer.get() > sleep;
+        return _sleepTimer.get() > sleep;
     }
 
     private double getPosition() {
@@ -189,5 +199,7 @@ public class Drive implements IActor {
         SmartDashboard.putNumber("L-Quad", _frontLeft.getSensorCollection().getQuadraturePosition());
         SmartDashboard.putNumber("Rot (ADXRS450)", _gyro.getAngle());
         SmartDashboard.putNumber("Rot", getHeading());
+        SmartDashboard.putNumber("FL Curr", _frontLeft.getStatorCurrent());
+        SmartDashboard.putNumber("FR Curr", _frontRight.getStatorCurrent());
     }
 }

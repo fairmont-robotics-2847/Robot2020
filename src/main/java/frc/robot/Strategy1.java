@@ -14,12 +14,12 @@ public class Strategy1 implements IStrategy {
     IAction[] _actions = {
         new StartIntake(),
         new Move (9),
-        new Shoot(6),
+        new Shoot(3),
         new Move(-3),
         new Turn(90),
-        new Move (5.56),
+        new Move (5),
         new Turn(90),
-        new Move(23)
+        new Move(24)
     };
   
 	int _action;
