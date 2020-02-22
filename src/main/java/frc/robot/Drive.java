@@ -28,7 +28,7 @@ public class Drive implements IActor {
     WPI_VictorSPX _rearLeft = new WPI_VictorSPX(1);
 
     Timer _sleepTimer = new Timer();
-    Timer _driveTimer = new Timer();
+    Timer _overCurrentTimer = new Timer();
 
     SpeedControllerGroup _left = new SpeedControllerGroup(_frontLeft, _rearLeft);    
     SpeedControllerGroup _right = new SpeedControllerGroup(_frontRight, _rearRight);
@@ -91,7 +91,7 @@ public class Drive implements IActor {
             Move move = (Move)_action;
             double position = getPosition();
             double heading = getHeading();
-            _driveTimer.start();
+            _overCurrentTimer.start();
             
             // Slow down when we our near the target position
             double speed = Math.abs(move.getGoal() - position) < kMoveAnticipationDistance ? kMoveSlowSpeed : kMoveFastSpeed;
@@ -103,14 +103,18 @@ public class Drive implements IActor {
             else rotation = 0;
 
             System.out.println("Drive: Goal: " + move.getGoal() + "; position: " + position);
-            if (Math.abs(_frontRight.getStatorCurrent()) > 50.0) {
             
+            // If we see a spike in the current, we're probably stuck
+            boolean abort = false;
+            if (Math.abs(_frontRight.getStatorCurrent()) > 45.0) {
+                if (_overCurrentTimer.get() > 0.5) abort = true;
             } else {
-
+                _overCurrentTimer.start();
             }
-            if (move.getGoal() > 0 && position < move.getGoal()) {
+
+            if (!abort && move.getGoal() > 0 && position < move.getGoal()) {
                 _drive.arcadeDrive(speed, rotation);
-            } else if (move.getGoal() < 0 && position > move.getGoal()) {
+            } else if (!abort && move.getGoal() < 0 && position > move.getGoal()) {
                 //_drive.arcadeDrive(-speed, -rotation);
                 _drive.arcadeDrive(-speed, rotation);
             } else {
@@ -153,6 +157,7 @@ public class Drive implements IActor {
             _action = action;
             resetPosition();
             resetHeading();
+            _overCurrentTimer.start();
             return true;
         } else if (action instanceof Sleep) {
             _action = action;
