@@ -19,7 +19,7 @@ public class Climber {
 		} else if (direction == Direction.down) {
 			_climberMotor.set(kElevatorSpeed);
 		} else {
-			_climberMotor.set(0.1);
+			_climberMotor.set(-0.1);
 		}
     }     
 }
