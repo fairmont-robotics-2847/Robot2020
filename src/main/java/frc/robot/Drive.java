@@ -42,8 +42,10 @@ public class Drive implements IActor {
     private static final double kTurnSlowSpeed = 0.4;
 
     private static final double kMoveAnticipationDistance = 2.0;
-    private static final double kMoveFastSpeed = 0.59;
-    private static final double kMoveSlowSpeed = 0.41;
+
+    public static final double kMoveFastSpeed = 0.7; // was .59
+    private static final double kMoveSlowSpeed = 0.5; // was .41
+
     private static final double kMoveTurnAdjustment = 0.225;
     private static final double kClosedLoopRampTime = 0.5; // in seconds
     private static final double kOpenLoopRampTime = 0.5; // in seconds
@@ -92,7 +94,7 @@ public class Drive implements IActor {
             double heading = getHeading();
             
             // Slow down when we our near the target position
-            double speed = Math.abs(move.getGoal() - position) < kMoveAnticipationDistance ? kMoveSlowSpeed : kMoveFastSpeed;
+            double speed = Math.abs(move.getGoal() - position) < kMoveAnticipationDistance ? kMoveSlowSpeed : move.getSpeed();
 
             // Add rotation to correct heading errors
             double rotation;

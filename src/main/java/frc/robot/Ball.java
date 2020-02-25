@@ -64,7 +64,7 @@ public class Ball implements IActor {
         _intakeMotor.setNeutralMode(NeutralMode.Coast);
     }
     
-    public void teleopPeriodic(boolean intake, boolean shoot, boolean reverseIntake, boolean advanceBall, boolean reverseBall) { 
+    public void teleopPeriodic(boolean intake, boolean shoot, boolean reverseIntake, boolean advanceBall, boolean reverseBall, boolean reverseFlywheel) { 
         SmartDashboard.putBoolean("Use Ball Sensor", _useBallSensor);
         SmartDashboard.putBoolean("Ball Sens 1", _ballReadyToConvey[0].get());
         //SmartDashboard.putBoolean("Ball Sens 2", _ballReadyToConvey[1].get());
@@ -89,12 +89,16 @@ public class Ball implements IActor {
         else intakeMotorSpeed = 0;
         _intakeMotor.set(intakeMotorSpeed);
 
-        if (shoot) {
+        
+        if (reverseFlywheel) {
+            reverseShooter();
+        } else if (shoot) {
             runShooter(_timer.get());
             SmartDashboard.putNumber("time", _timer.get());
         } else {
             stopShooter();
         }
+
 
         if (reverseBall) {
             _conveyorMotor.set(-kConveyorMotorSpeed);
@@ -125,6 +129,10 @@ public class Ball implements IActor {
 
     private void stopShooter() {
         _flyWheelMotor.set(0);
+    }
+
+    private void reverseShooter() {
+        _flyWheelMotor.set(-kFlyWheelMotorSpeed);
     }
 
     public void autonomousPeriodic() {

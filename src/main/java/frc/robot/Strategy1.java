@@ -8,7 +8,7 @@ public class Strategy1 implements IStrategy {
     }
 
     public String getName() {
-        return "Drive forward, hit up the trench";
+        return "Facing Port";
     }
 
     IAction[] _actions = {
@@ -16,10 +16,11 @@ public class Strategy1 implements IStrategy {
         new Move (9),
         new Shoot(6),
         new Move(-3),
-        new Turn(90),
-        new Move (5.56),
-        new Turn(90),
-        new Move(23)
+        new Turn(85), // should be 90
+        new Move (5),
+        new Turn(75), // should also be 90
+        new Move(10, 0.9),
+        new Move(11, 0.6)
     };
   
 	int _action;

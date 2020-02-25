@@ -77,13 +77,14 @@ public class Robot extends TimedRobot implements ICommander {
 		boolean intake = _stick.getRawButton(1);
 		boolean reverseIntake = _stick.getRawButton(2);
 		boolean shoot = _stick.getRawButton(3);
+		boolean reverseFlywheel = _stick.getRawButton(10);
 		boolean advanceBall = _stick.getRawButton(6);
 		boolean reverseBall = _stick.getRawButton(7);
 		boolean toggleBallSensorOn = _stick.getRawButton(8);
 		boolean toggleBallSensorOff = _stick.getRawButton(9);
 		if (toggleBallSensorOff) _ball.setUseBallSensor(false);
 		else if (toggleBallSensorOn) _ball.setUseBallSensor(true);
-		_ball.teleopPeriodic(intake, shoot, reverseIntake, advanceBall, reverseBall);
+		_ball.teleopPeriodic(intake, shoot, reverseIntake, advanceBall, reverseBall, reverseFlywheel);
 
 		boolean up = _joy.getRawButton(4);
 		boolean down = _joy.getRawButton(2);

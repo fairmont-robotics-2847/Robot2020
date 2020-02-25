@@ -6,14 +6,15 @@ public class Strategy3 implements IStrategy {
     }
 
     public String getName() {
-        return "Literally just drive forward and pick up trench balls";
+        return "Facing Color Wheel (Left)";
     }
 
     IAction[] _actions = {
         new StartIntake(),
-        new Move(10.84),
-        new Turn(-90),
-        new Move(2)
+        new Move(8.8),
+        new Move(-3),
+        new Turn(30),
+        new Move(4)
     };
     int _action;
 

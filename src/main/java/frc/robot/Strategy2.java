@@ -6,15 +6,23 @@ public class Strategy2 implements IStrategy {
     }
 
     public String getName() {
-        return "Flip a Uie";
+        return "Facing Middle";
     }
 
     IAction[] _actions = {
-        new Sleep(5),
-        new Move(5.08),
+        new StartIntake(),
+        new Move(5),
+        new Turn(90),
+        new Move(6),
         new Turn(-90),
-        new Move(10),
-        new Shoot(6)
+        new Move(4),
+        new Shoot(3),
+        new Move(-3),
+        new Turn(90),
+        new Move (5),
+        new Turn(90),
+        new Move(10, 0.9),
+        new Move(11, 0.6)
     };
     int _action;
 
