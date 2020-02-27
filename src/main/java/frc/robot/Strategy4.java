@@ -6,17 +6,19 @@ public class Strategy4 implements IStrategy {
     }
 
     public String getName() {
-        return "Skrrrrrt route";
+        return "Facing trench";
     }
 
     IAction[] _actions = {
         new StartIntake(),
-        new Move(0),
-        new Turn(-90),
-        new Move(5.08),
-        new Turn(-90),
-        new StopIntake(),
-        new Move(0)
+        new Move(5.0, 0.9),
+        new Move(8.0, 0.6),
+        new Move(-20.0, 0.8),
+        new Turn(100),
+        new Move(6.0, 0.5),
+        new Turn(80),
+        new Shoot(5)
+
     };
     int _action;
 
