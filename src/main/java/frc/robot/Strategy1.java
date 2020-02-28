@@ -14,11 +14,11 @@ public class Strategy1 implements IStrategy {
     IAction[] _actions = {
         new StartIntake(),
         new Move (9),
-        new Shoot(6),
+        new Shoot(3),
         new Move(-3),
-        new Turn(90), // should be 90
+        new Turn(89), // should be 90
         new Move (5),
-        new Turn(90), // should also be 90
+        new Turn(89), // should also be 90
         new Move(10, 0.9),
         new Move(11, 0.6)
     };

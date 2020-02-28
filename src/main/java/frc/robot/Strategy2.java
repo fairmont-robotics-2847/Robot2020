@@ -14,10 +14,7 @@ public class Strategy2 implements IStrategy {
         new Turn(36.67),
         new Move(9.35),
         new Turn(-36.67),
-        new Shoot(3),
-        new Move(-3),
-        new Turn(90),
-        new Move (5)
+        new Shoot(3)
     };
     int _action;
 

@@ -80,7 +80,7 @@ public class Drive implements IActor {
     }
 
     public void teleopPeriodic(double speed, double rotation) {
-        _drive.arcadeDrive(speed * 0.9, rotation * 0.7);
+        _drive.arcadeDrive(speed * 0.9, rotation * 0.6);
         reportDiagnostics();
     }
 
